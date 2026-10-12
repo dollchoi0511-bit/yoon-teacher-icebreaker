@@ -110,6 +110,7 @@
 
     <!-- Main Container -->
     <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full">
+        <p id="firebase-status" role="status" aria-live="polite" class="text-xs text-slate-500 mb-4">저장 서버 연결 준비 중…</p>
 
         <!-- PAGE 1: EXPRESSION FORM -->
         <section id="page-express" class="space-y-8 transition-all">
@@ -125,7 +126,7 @@
                         오늘 당신의 마음에 머무는 감정은 무엇인가요?
                     </h2>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        60가지의 다양한 감정 캐릭터 카드 중에서 나의 마음을 가장 잘 담아낸 카드를 찾아 끌어다 놓거나 선택해보세요.
+                        70가지의 다양한 감정 캐릭터 카드 중에서 나의 마음을 가장 잘 담아낸 카드를 찾아 끌어다 놓거나 선택해보세요.
                     </p>
                 </div>
 
@@ -225,7 +226,7 @@
 
             <!-- Submit Action Button -->
             <div class="flex justify-center pt-2">
-                <button onclick="submitHeartCards()" class="px-10 py-4 bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 hover:from-pink-600 hover:to-amber-500 text-white text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 transition flex items-center gap-3">
+                <button id="submit-button" onclick="submitHeartCards()" class="px-10 py-4 bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 hover:from-pink-600 hover:to-amber-500 text-white text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 transition flex items-center gap-3">
                     <i class="fa-solid fa-paper-plane text-xl"></i>
                     <span>나의 마음 등록하기 및 나누기</span>
                 </button>
@@ -344,70 +345,108 @@
         <span id="toast-message" class="text-sm font-medium">안내 메시지</span>
     </div>
 
-    <!-- Firebase Imports -->
+    <!--
+    Firebase 연결 순서
+    1. Firebase 콘솔 > 프로젝트 설정 > 웹 앱 등록 > firebaseConfig를 아래에 복사.
+    2. Authentication > 로그인 방법 > 익명 사용 설정.
+    3. Firestore Database > 데이터베이스 만들기 (기본 데이터베이스).
+    4. Firestore > 규칙에 아래 규칙을 게시.
+    5. 이 파일을 index.html로 GitHub Pages 또는 웹 서버에 배포.
+    같은 WORKSHOP_ID를 쓰는 모든 참여자가 같은 목록을 봅니다.
+    아래 규칙은 익명 로그인한 모든 이용자에게 이 워크숍 목록을 공개합니다.
+    별도 참여자 제한이 필요한 경우 인증/접근 제어를 추가해야 합니다.
+
+    rules_version = '2';
+    service cloud.firestore {
+      match /databases/{database}/documents {
+        match /workshops/{workshopId}/submissions/{submissionId} {
+          allow read: if request.auth != null;
+          allow create: if request.auth != null
+            && request.resource.data.keys().hasOnly(['id','uid','userName','card1','reason1','card2','reason2','timestamp','createdAt','reactions'])
+            && request.resource.data.id == submissionId
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.userName is string
+            && request.resource.data.userName.size() > 0
+            && request.resource.data.userName.size() <= 80
+            && request.resource.data.reason1 is string
+            && request.resource.data.reason1.size() > 0
+            && request.resource.data.reason1.size() <= 2000
+            && request.resource.data.reason2 is string
+            && request.resource.data.reason2.size() > 0
+            && request.resource.data.reason2.size() <= 2000
+            && request.resource.data.card1 is int
+            && request.resource.data.card1 >= 1 && request.resource.data.card1 <= 70
+            && request.resource.data.card2 is int
+            && request.resource.data.card2 >= 1 && request.resource.data.card2 <= 70
+            && request.resource.data.timestamp is string
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.reactions == {'heart': 0, 'cheer': 0, 'warm': 0};
+          allow update: if request.auth != null
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+            && request.resource.data.reactions.keys().hasOnly(['heart','cheer','warm'])
+            && ((request.resource.data.reactions.heart == resource.data.reactions.heart + 1
+              && request.resource.data.reactions.cheer == resource.data.reactions.cheer
+              && request.resource.data.reactions.warm == resource.data.reactions.warm)
+            || (request.resource.data.reactions.cheer == resource.data.reactions.cheer + 1
+              && request.resource.data.reactions.heart == resource.data.reactions.heart
+              && request.resource.data.reactions.warm == resource.data.reactions.warm)
+            || (request.resource.data.reactions.warm == resource.data.reactions.warm + 1
+              && request.resource.data.reactions.heart == resource.data.reactions.heart
+              && request.resource.data.reactions.cheer == resource.data.reactions.cheer));
+          allow delete: if false;
+        }
+      }
+    }
+    -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global Firebase state & variables
-        window.db = null;
-        window.auth = null;
-        window.currentUser = null;
-        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'emotion-cards-workshop-default';
-
-        // Expose Firestore helper functions globally for classic script access
-        window.dbHelpers = {
-            collection,
-            doc,
-            setDoc,
-            onSnapshot,
-            updateDoc
+        // ★ Firebase 콘솔에서 받은 firebaseConfig 객체로 아래 객체를 교체하세요.
+        const firebaseConfig = {
+            apiKey: "AIzaSyAB-8wIbLAQgSLv24e82YIW8W7WQkK_McI",
+            authDomain: "yoon-t.firebaseapp.com",
+            projectId: "yoon-t",
+            storageBucket: "yoon-t.firebasestorage.app",
+            messagingSenderId: "44405483224",
+            appId: "1:44405483224:web:98b8febedb9b9e6a3999ad"
         };
-
+        // ★ 연수별로 값을 바꾸면 참여자 목록을 분리할 수 있습니다.
+        window.appId = 'emotion-cards-workshop-2026';
+        window.dbHelpers = { collection, doc, setDoc, onSnapshot, updateDoc, increment, serverTimestamp };
+        window.firebaseReady = false;
+        function setStatus(message) {
+            document.getElementById('firebase-status').textContent = message;
+        }
+        window.firebaseError = function(error) {
+            console.error(error);
+            const message = error.code === 'permission-denied' ? 'Firestore 보안 규칙을 확인해주세요.'
+                : error.code === 'auth/operation-not-allowed' ? 'Firebase Authentication에서 익명 로그인을 켜주세요.'
+                : 'Firebase 설정 또는 네트워크 연결을 확인해주세요.';
+            setStatus(message);
+            return message;
+        };
         async function initFirebase() {
+            if (firebaseConfig.apiKey.startsWith('YOUR_') || firebaseConfig.projectId.startsWith('YOUR_')) {
+                setStatus('Firebase 설정이 필요합니다. 파일의 firebaseConfig를 입력해주세요.');
+                return;
+            }
             try {
-                let firebaseConfig = null;
-                if (typeof __firebase_config !== 'undefined') {
-                    firebaseConfig = JSON.parse(__firebase_config);
-                } else {
-                    // Fallback config if environment variable absent
-                    firebaseConfig = {
-                        apiKey: "AIzaSyDemoConfigForEmotionCardsKey",
-                        authDomain: "demo-emotion-cards.firebaseapp.com",
-                        projectId: "demo-emotion-cards",
-                        storageBucket: "demo-emotion-cards.appspot.com",
-                        messagingSenderId: "123456789",
-                        appId: "1:123456789:web:demo"
-                    };
-                }
-
+                setStatus('저장 서버에 연결 중…');
                 const app = initializeApp(firebaseConfig);
                 window.db = getFirestore(app);
                 window.auth = getAuth(app);
-
-                // Authentication step
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(window.auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(window.auth);
-                }
-
-                onAuthStateChanged(window.auth, (user) => {
-                    if (user) {
-                        window.currentUser = user;
-                        console.log("Firebase Auth Ready. User UID:", user.uid);
-                        loadSubmissionsFromFirebase();
-                    }
-                });
-
-            } catch (err) {
-                console.warn("Firebase initialization skipped or failed, using local mode:", err);
-                // Fallback local submissions loading
-                window.renderSubmissions(window.localSubmissions || []);
+                const credential = await signInAnonymously(window.auth);
+                window.currentUser = credential.user;
+                window.firebaseReady = true;
+                setStatus('저장 서버 연결됨');
+                window.loadSubmissionsFromFirebase();
+            } catch (error) {
+                window.firebaseReady = false;
+                window.firebaseError(error);
             }
         }
-
         window.initFirebase = initFirebase;
         initFirebase();
     </script>
@@ -854,12 +893,17 @@
         function showCardSelectModal(slotNum) {
             // If empty slot clicked directly, show toast tip
             if ((slotNum === 1 && !currentSelection.card1) || (slotNum === 2 && !currentSelection.card2)) {
-                showToast("아래 60가지 카드 중 원하는 카드를 클릭하거나 끌어다 놓으세요! 👇");
+                showToast("아래 70가지 카드 중 원하는 카드를 클릭하거나 끌어다 놓으세요! 👇");
             }
         }
 
         /* Submit Heart Cards */
         async function submitHeartCards() {
+            if (window.isSubmitting) return;
+            if (!window.firebaseReady) {
+                showToast('저장 서버 연결이 필요합니다. 상단 연결 상태를 확인해주세요.', 'warning');
+                return;
+            }
             const userNameInput = document.getElementById("user-name").value.trim();
             const reason1Input = document.getElementById("reason-1").value.trim();
             const reason2Input = document.getElementById("reason-2").value.trim();
@@ -892,31 +936,31 @@
                 return;
             }
 
+            if (userNameInput.length > 80 || reason1Input.length > 2000 || reason2Input.length > 2000) {
+                showToast('이름은 80자, 선택 이유는 각각 2000자 이내로 입력해주세요.', 'warning');
+                return;
+            }
+            window.isSubmitting = true;
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.querySelector('span').textContent = '저장 중…';
             const submissionData = {
                 id: "sub_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+                uid: window.currentUser.uid,
                 userName: userNameInput,
-                card1: currentSelection.card1,
+                card1: currentSelection.card1.id,
                 reason1: reason1Input,
-                card2: currentSelection.card2,
+                card2: currentSelection.card2.id,
                 reason2: reason2Input,
                 timestamp: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-                createdAt: Date.now(),
+                createdAt: window.dbHelpers.serverTimestamp(),
                 reactions: { heart: 0, cheer: 0, warm: 0 }
             };
 
             try {
-                if (window.db && window.dbHelpers) {
-                    // Firebase Firestore Path: /artifacts/{appId}/public/data/submissions
-                    const { collection, doc, setDoc } = window.dbHelpers;
-                    const colRef = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'submissions');
-                    const docRef = doc(colRef, submissionData.id);
-                    await setDoc(docRef, submissionData);
-                } else {
-                    // Local fallback storage
-                    if (!window.localSubmissions) window.localSubmissions = [];
-                    window.localSubmissions.unshift(submissionData);
-                    window.renderSubmissions(window.localSubmissions);
-                }
+                const { collection, doc, setDoc } = window.dbHelpers;
+                const colRef = collection(window.db, 'workshops', window.appId, 'submissions');
+                await setDoc(doc(colRef, submissionData.id), submissionData);
 
                 showToast("🎉 마음 카드가 성공적으로 공유되었습니다! 함께 나누는 페이지로 이동합니다.");
                 
@@ -931,42 +975,40 @@
 
             } catch (err) {
                 console.error("Error saving submission:", err);
-                showToast("저장 도중 오류가 발생했으나 임시 공유에 반영되었습니다.");
+                showToast('저장하지 못했습니다. ' + window.firebaseError(err), 'warning');
+            } finally {
+                window.isSubmitting = false;
+                submitButton.disabled = false;
+                submitButton.querySelector('span').textContent = '나의 마음 등록하기 및 나누기';
             }
         }
 
         /* Firebase Realtime Submissions Loader */
+        window.submissionsCache = [];
+        let unsubscribeSubmissions = null;
         function loadSubmissionsFromFirebase() {
-            if (!window.db || !window.dbHelpers) {
-                window.renderSubmissions(window.localSubmissions || []);
-                return;
-            }
-
-            try {
-                const { collection, onSnapshot } = window.dbHelpers;
-                const colRef = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'submissions');
-                
-                onSnapshot(colRef, (snapshot) => {
-                    const list = [];
-                    snapshot.forEach(doc => {
-                        list.push(doc.data());
-                    });
-
-                    // Sort locally by creation timestamp descending
-                    list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    window.renderSubmissions(list);
-                }, (error) => {
-                    console.error("Firestore onSnapshot error:", error);
-                    window.renderSubmissions(window.localSubmissions || []);
-                });
-            } catch (err) {
-                console.error("Firestore load error:", err);
-                window.renderSubmissions(window.localSubmissions || []);
-            }
+            if (!window.firebaseReady) return;
+            if (unsubscribeSubmissions) unsubscribeSubmissions();
+            const { collection, onSnapshot } = window.dbHelpers;
+            const colRef = collection(window.db, 'workshops', window.appId, 'submissions');
+            unsubscribeSubmissions = onSnapshot(colRef, (snapshot) => {
+                const list = snapshot.docs.filter(d => !d.metadata.hasPendingWrites).map(d => ({...d.data(), id: d.id}));
+                list.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+                window.submissionsCache = list;
+                window.renderSubmissions(list);
+                document.getElementById('firebase-status').textContent = snapshot.metadata.fromCache
+                    ? '서버 연결 대기 중 · 이전 목록 표시' : '저장 서버 연결됨 · 실시간 공유 중';
+            }, (error) => {
+                unsubscribeSubmissions = null;
+                showToast(window.firebaseError(error), 'warning');
+            });
         }
 
         window.loadSubmissionsFromFirebase = loadSubmissionsFromFirebase;
 
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
         /* Render Community Submissions Cards Feed */
         window.renderSubmissions = function(list) {
             const feed = document.getElementById("submissions-feed");
@@ -990,8 +1032,9 @@
             feed.innerHTML = "";
 
             filtered.forEach(item => {
-                const card1 = item.card1;
-                const card2 = item.card2;
+                const card1 = EMOTION_CARDS.find(c => c.id === item.card1);
+                const card2 = EMOTION_CARDS.find(c => c.id === item.card2);
+                if (!card1 || !card2) return;
 
                 const itemEl = document.createElement("div");
                 itemEl.className = "bg-white rounded-3xl p-6 card-shadow border border-slate-100 flex flex-col justify-between space-y-5 transition hover:border-pink-200";
@@ -1001,11 +1044,11 @@
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-400 to-amber-300 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                ${item.userName.charAt(0)}
+                                ${escapeHTML(item.userName.charAt(0))}
                             </div>
                             <div>
-                                <h4 class="font-bold text-slate-800 text-base">${item.userName}</h4>
-                                <span class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${item.timestamp || '방금 전'}</span>
+                                <h4 class="font-bold text-slate-800 text-base">${escapeHTML(item.userName)}</h4>
+                                <span class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${escapeHTML(item.timestamp || '방금 전')}</span>
                             </div>
                         </div>
                         <span class="text-xs font-bold text-pink-500 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-100">
@@ -1027,7 +1070,7 @@
                                 </div>
                             </div>
                             <p class="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 leading-relaxed font-sans">
-                                "${item.reason1}"
+                                "${escapeHTML(item.reason1)}"
                             </p>
                         </div>
 
@@ -1042,7 +1085,7 @@
                                 </div>
                             </div>
                             <p class="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 leading-relaxed font-sans">
-                                "${item.reason2}"
+                                "${escapeHTML(item.reason2)}"
                             </p>
                         </div>
 
@@ -1070,33 +1113,22 @@
         };
 
         function filterSubmissions() {
-            if (window.localSubmissions || window.db) {
-                loadSubmissionsFromFirebase();
-            }
+            window.renderSubmissions(window.submissionsCache || []);
         }
 
-        /* Interactive Reaction Trigger */
         async function addReaction(submissionId, type, btnEl) {
-            const countSpan = btnEl.querySelector(".reaction-count");
-            let currentVal = parseInt(countSpan.innerText, 10) || 0;
-            countSpan.innerText = currentVal + 1;
-
-            btnEl.classList.add("scale-125");
-            setTimeout(() => btnEl.classList.remove("scale-125"), 200);
-
-            showToast("따뜻한 마음 표현이 전송되었습니다! ❤️");
-
-            if (window.db && window.dbHelpers) {
-                try {
-                    const { doc, updateDoc } = window.dbHelpers;
-                    const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'submissions', submissionId);
-                    const fieldKey = `reactions.${type}`;
-                    await updateDoc(docRef, {
-                        [fieldKey]: currentVal + 1
-                    });
-                } catch (e) {
-                    console.warn("Reaction update failed:", e);
-                }
+            if (!window.firebaseReady || btnEl.disabled || !['heart', 'cheer', 'warm'].includes(type)) return;
+            btnEl.disabled = true;
+            try {
+                const { doc, updateDoc, increment } = window.dbHelpers;
+                await updateDoc(doc(window.db, 'workshops', window.appId, 'submissions', submissionId), {
+                    [`reactions.${type}`]: increment(1)
+                });
+                showToast('따뜻한 마음 표현이 전송되었습니다! ❤️');
+            } catch (error) {
+                showToast('공감을 저장하지 못했습니다. ' + window.firebaseError(error), 'warning');
+            } finally {
+                btnEl.disabled = false;
             }
         }
 
