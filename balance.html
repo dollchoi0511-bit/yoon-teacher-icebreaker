@@ -15,8 +15,17 @@ async function api(action,data={}) {
   if(action==='identity') {const a=await getDoc(doc(db,'admins',me));window.host=a.exists();return {host:window.host};}
   if(action==='create') {
     if(!window.host)throw Error('관리자 로그인이 필요합니다.');
-    const r=doc(collection(db,'balanceRooms'));
-    await setDoc(r,{phase:'lobby',q:0,seconds:20,deadline:0,hostUid:me,createdAt:serverTimestamp()});return {id:r.id};
+    for(let attempt=0;attempt<12;attempt++){
+      const values=new Uint32Array(1);crypto.getRandomValues(values);
+      const code=String(100000+(values[0]%900000));
+      const r=doc(db,'balanceRooms',code);
+      const created=await runTransaction(db,async tx=>{
+        const existing=await tx.get(r);if(existing.exists())return false;
+        tx.set(r,{phase:'lobby',q:0,seconds:20,deadline:0,hostUid:me,createdAt:serverTimestamp()});return true;
+      });
+      if(created)return {id:code};
+    }
+    throw Error('참가 코드 생성이 지연되고 있어요. 다시 시도해주세요.');
   }
   const r=doc(db,'balanceRooms',room), member=doc(r,'people',me);
   if(action==='join') {const name=String(data.name||'').trim();if(!name||name.length>40)throw Error('학교와 이름을 40자 이내로 입력해주세요.');await setDoc(member,{name,uid:me});return {ok:true};}
@@ -47,19 +56,41 @@ async function api(action,data={}) {
   throw Error('잘못된 요청입니다.');
 }
 function error(e){const messages={'permission-denied':'권한이 없어요. firestore.rules 게시와 admins 관리자 UID 문서를 확인해주세요.','auth/admin-restricted-operation':'Firebase Authentication에서 익명 로그인을 사용 설정해주세요.','auth/operation-not-allowed':'Firebase Authentication 로그인 제공자를 사용 설정해주세요.','auth/unauthorized-domain':'Firebase Authentication 승인된 도메인에 GitHub Pages 주소를 추가해주세요.'};$('error').textContent=messages[e.code]||e.message;$('error').style.display='block'}function clearError(){$('error').style.display='none'}
-async function init(){try{const d=await api('identity');window.host=d.host;if(!room){$('app').innerHTML='<h1>서로 다른 선택,<br>함께 나누는 이야기.</h1><p>진행자가 공유한 참가 링크로 입장해주세요.</p>'+(d.host?'<div class="panel"><h2>새 연수 시작하기</h2><p>참가 링크를 만들고 선생님들을 초대해요.</p><button id="create">연수방 만들기</button></div>':'<p>진행자라면 위의 관리자 로그인을 눌러주세요.</p>');if(d.host)$('create').onclick=async()=>{try{const x=await api('create');location.search='?room='+x.id}catch(e){error(e)}};return}await poll();setInterval(poll,1200);setInterval(tick,250)}catch(e){error(e)}}
+function participantLink(){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('room',room);return u.href;}
+function sharePanel(){
+  const numeric=/^\d{6}$/.test(room||'');
+  return '<div class="admin"><div class="eyebrow">선생님들께 공유해주세요</div><h2>참가 안내</h2>'+
+    (numeric?'<p style="margin-bottom:4px">참가 코드</p><div class="row"><strong style="font-size:42px;letter-spacing:8px;font-variant-numeric:tabular-nums">'+room+'</strong><button type="button" class="soft" id="copyCode">코드 복사</button></div><p>같은 게임 페이지를 열고 위의 6자리 코드를 입력하면 돼요.</p>':'<p>기존 방은 아래 링크로 입장해주세요. 새 연수방을 만들면 6자리 코드가 생겨요.</p>')+
+    '<label for="participantLink">참가 링크</label><input style="width:100%;font-size:14px" id="participantLink" readonly value="'+esc(participantLink())+'"><button type="button" class="soft" id="copy">참가 링크 복사</button></div>';
+}
+function bindShare(){
+  if($('participantLink'))$('participantLink').onclick=()=> $('participantLink').select();
+  if($('copy'))$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(participantLink());$('copy').textContent='복사했어요'}catch(e){$('participantLink').focus();$('participantLink').select();error(Error('표시된 참가 링크를 선택했어요. Ctrl+C로 복사해주세요.'));}};
+  if($('copyCode'))$('copyCode').onclick=async()=>{try{await navigator.clipboard.writeText(room);$('copyCode').textContent='복사했어요'}catch(e){error(Error('화면에 표시된 6자리 코드를 전달해주세요.'));}};
+}
+function normalizeCode(value){return value.replace(/[０-９]/g,c=>String(c.charCodeAt(0)-0xFF10)).replace(/\s/g,'');}
+async function init(){try{
+  const d=await api('identity');window.host=d.host;
+  if(!room){
+    $('app').innerHTML='<h1>서로 다른 선택,<br>함께 나누는 이야기.</h1><p>진행자가 알려준 6자리 참가 코드를 입력해주세요.</p><form id="codeForm" class="panel"><label for="roomCode">참가 코드</label><input id="roomCode" type="text" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="예: 123456" required style="font-size:28px;letter-spacing:6px"><p id="codeError" role="alert" style="color:#a33e32"></p><button id="codeSubmit">코드 확인 · 다음</button></form>'+(d.host?'<div class="panel"><h2>새 연수 시작하기</h2><p>6자리 참가 코드와 참가 링크를 만들고 선생님들을 초대해요.</p><button id="create">연수방 만들기</button></div>':'<p>진행자라면 위의 관리자 로그인을 눌러주세요.</p>');
+    $('codeForm').onsubmit=async e=>{e.preventDefault();const code=normalizeCode($('roomCode').value);$('codeError').textContent='';if(!/^\d{6}$/.test(code)){$('codeError').textContent='참가 코드를 숫자 6자리로 입력해주세요.';$('roomCode').focus();return;}$('codeSubmit').disabled=true;try{await ready;const r=await getDoc(doc(db,'balanceRooms',code));if(!r.exists())throw Error('해당 코드의 연수방이 없어요. 진행자에게 코드를 확인해주세요.');location.search='?room='+code;}catch(e){$('codeError').textContent=e.code==='permission-denied'?'Firebase 보안 규칙을 확인해주세요.':e.message;$('codeSubmit').disabled=false;}};
+    if(d.host)$('create').onclick=async()=>{$('create').disabled=true;try{const x=await api('create');location.search='?room='+x.id}catch(e){error(e);$('create').disabled=false;}};
+    return;
+  }
+  await poll();setInterval(poll,1200);setInterval(tick,250);
+}catch(e){error(e)}}
 let polling=false;async function poll(){if(pending||polling)return;polling=true;try{const d=await api('state');offset=d.now-Date.now();state=d;clearError();render()}catch(e){error(e)}finally{polling=false}}
-function render(){const s=state;if(!s.mine){if(lastKey==='join')return;lastKey='join';$('app').innerHTML='<h1>반가워요, 선생님!</h1><p>학교와 이름을 입력하고 입장해주세요.</p><form id="join" class="panel"><label for="name">학교 · 이름</label><input id="name" maxlength="40" required placeholder="예: 매홀중 최윤정"><button>입장하기</button></form>';$('join').onsubmit=async e=>{e.preventDefault();try{await api('join',{name:$('name').value.trim()});lastKey='';poll()}catch(e){error(e)}};return}
+function render(){const s=state;if(!s.mine){if(lastKey==='join:'+me)return;lastKey='join:'+me;$('app').innerHTML='<h1>반가워요, 선생님!</h1>'+(window.host?sharePanel():'<p>참가 코드를 확인했어요. 닉네임을 입력해주세요.</p>')+'<form id="join" class="panel"><label for="name">닉네임 (학교 · 이름)</label><input id="name" maxlength="40" required placeholder="예: 매홀중 최윤정"><button>입장하기</button></form>';bindShare();$('join').onsubmit=async e=>{e.preventDefault();try{await api('join',{name:$('name').value.trim()});lastKey='';poll()}catch(e){error(e)}};return}
 const answer=s.answer,q=Q[s.q], key=JSON.stringify([s.phase,s.q,s.people,s.answers,answer,s.seconds,s.count,s.reasonCount]);if(lastKey===key){tick();return}lastKey=key;
 if($('modal').open&&(modalQ!==s.q||s.phase==='done')){$('modal').close();modalQ=null}
-let html='<div class="row"><span class="chip">'+esc(s.mine.name)+'</span><span>'+s.people.length+'명 입장</span></div>';
+let html=(window.host?sharePanel():'')+'<div class="row"><span class="chip">'+esc(s.mine.name)+'</span><span>'+s.people.length+'명 입장</span></div>';
 if(s.phase==='lobby'){html+='<h1>함께 시작할 준비를 하고 있어요.</h1><p>모두 입장하면 진행자가 게임을 시작합니다.<br>1~3번은 선택만, 4~8번은 선택 이유도 한 줄 나눠요.</p><div class="panel"><div class="count">'+s.people.length+'<small style="font-size:20px"> 명 입장</small></div><h2>지금 함께하는 선생님들</h2><div class="chips">'+s.people.map(x=>'<span class="chip">'+esc(x.name)+'</span>').join('')+'</div></div>'}
 else if(s.phase==='done'){html+='<h1>우리의 이야기는 계속됩니다.</h1><p>서로 다른 선택 속에서 비슷한 고민을 발견하셨나요?<br>함께 나눈 이야기를 다음 연수로 이어가요.</p><div class="panel"><h2>8개의 질문, 함께 나눈 선택</h2>'+s.summary.map((x,i)=>'<p><b>'+(i+1)+'. '+Q[i][0]+'</b><br>A '+x.a+'명 · B '+x.b+'명</p>').join('')+'</div>'}
 else{html+='<div class="step">'+Q.map((_,i)=>'<span class="'+(i<=s.q?'on':'')+'"></span>').join('')+'</div><div class="row"><span class="eyebrow">QUESTION '+(s.q+1)+' / 8</span><span class="timer" id="timer"></span></div><h1>'+q[0]+'</h1>';
 if(s.phase==='vote'){html+='<p>'+(s.q>=3?'먼저 선택하고, 이유는 시간제한 없이 작성해주세요.':'마음이 더 가는 쪽을 선택해주세요.')+'</p><div class="grid">'+['A','B'].map((c,i)=>'<button class="choice '+c.toLowerCase()+' '+(answer?.choice===c?'chosen':'')+'" data-choice="'+c+'" '+(answer?'disabled':'')+'><strong>OPTION '+c+'</strong>'+q[i+1]+'</button>').join('')+'</div><div class="panel" style="text-align:center">'+(answer?'선택을 등록했어요. 다른 선생님들의 선택을 기다려주세요.':'<span id="wait">선택 시간 안에 한 가지를 골라주세요.</span>')+(answer&&s.q>=3&&!answer.reason?'<br><button id="reopen">이유 작성하기</button>':'')+'</div>'}
 else{const a=s.answers.filter(x=>x.choice==='A'),b=s.answers.filter(x=>x.choice==='B'),total=a.length+b.length;html+='<p>선택한 선생님 '+total+'명 · 미선택 '+(s.people.length-total)+'명</p><div class="row"><b>A '+a.length+'명 ('+(total?Math.round(a.length/total*100):0)+'%)</b><b>B '+b.length+'명 ('+(total?Math.round(b.length/total*100):0)+'%)</b></div><div class="bar">'+(total?'<div class="a" style="width:'+(a.length/total*100)+'%">'+(a.length?'A':'')+'</div><div class="b" style="width:'+(b.length/total*100)+'%">'+(b.length?'B':'')+'</div>':'<div style="width:100%;color:#68756b">아직 선택이 없어요</div>')+'</div><div class="grid">'+[a,b].map((list,i)=>'<div class="panel"><div class="eyebrow">OPTION '+(i?'B':'A')+'</div><h2>'+q[i+1]+'</h2>'+(s.q>=3?(list.length?list.map(x=>'<div class="reason"><small>'+esc(x.name)+'</small>'+esc(x.reason||'이유를 작성 중이에요.')+'</div>').join(''):'<p>아직 선택한 선생님이 없어요.</p>'):'<p>'+list.map(x=>esc(x.name)).join(' · ')+'</p>')+'</div>').join('')+'</div><p style="text-align:center">진행자가 다음 화면으로 이동할 때까지 기다려주세요.</p>';if(answer&&s.q>=3&&!answer.reason)html+='<button id="reopen">이유 작성하기</button>'}}
-if(window.host){html+='<div class="admin"><div class="row"><b>진행자 화면</b><button class="soft" id="copy">참가 링크 복사</button></div>';if(s.phase==='lobby')html+='<label>선택 제한시간 (초) <input id="seconds" type="number" min="5" max="120" value="'+s.seconds+'"></label><button id="start">시작하기</button>';if(s.phase==='vote')html+='<p>선택 '+s.count+' / '+s.people.length+'명'+(s.q>=3?' · 이유 작성 완료 '+s.reasonCount+'명':'')+'</p><button id="results">결과 확인 · 모두에게 공유</button>';if(s.phase==='results')html+='<p>이유 작성 완료 '+s.reasonCount+' / '+s.count+'명</p><button id="next">'+(s.q===7?'게임 마무리':'다음 질문 · 모두 함께 이동')+'</button>';if(s.phase==='done')html+='<button id="createNext">새 연수방 만들기</button>';html+='</div>'}
-$('app').innerHTML=html;document.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>choose(b.dataset.choice));if($('reopen'))$('reopen').onclick=openReason;if($('copy'))$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(location.href);$('copy').textContent='복사했어요'}catch(e){error(Error('주소창의 링크를 복사해주세요.'))}};for(const action of ['start','results','next'])if($(action))$(action).onclick=async()=>{if(action==='next'&&s.q>=3&&s.reasonCount<s.count&&!confirm('아직 이유를 작성 중인 선생님이 있어요. 다음 질문으로 이동할까요?'))return;try{await api(action,{seconds:Number($('seconds')?.value||s.seconds)});lastKey='';poll()}catch(e){error(e)}};if($('createNext'))$('createNext').onclick=async()=>{try{let r=await api('create');location.search='?room='+r.id}catch(e){error(e)}};tick();}
+if(window.host){html+='<div class="admin"><div class="row"><b>진행자 화면</b></div>';if(s.phase==='lobby')html+='<label>선택 제한시간 (초) <input id="seconds" type="number" min="5" max="120" value="'+s.seconds+'"></label><button id="start">시작하기</button>';if(s.phase==='vote')html+='<p>선택 '+s.count+' / '+s.people.length+'명'+(s.q>=3?' · 이유 작성 완료 '+s.reasonCount+'명':'')+'</p><button id="results">결과 확인 · 모두에게 공유</button>';if(s.phase==='results')html+='<p>이유 작성 완료 '+s.reasonCount+' / '+s.count+'명</p><button id="next">'+(s.q===7?'게임 마무리':'다음 질문 · 모두 함께 이동')+'</button>';if(s.phase==='done')html+='<button id="createNext">새 연수방 만들기</button>';html+='</div>'}
+$('app').innerHTML=html;document.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>choose(b.dataset.choice));if($('reopen'))$('reopen').onclick=openReason;bindShare();for(const action of ['start','results','next'])if($(action))$(action).onclick=async()=>{if(action==='next'&&s.q>=3&&s.reasonCount<s.count&&!confirm('아직 이유를 작성 중인 선생님이 있어요. 다음 질문으로 이동할까요?'))return;try{await api(action,{seconds:Number($('seconds')?.value||s.seconds)});lastKey='';poll()}catch(e){error(e)}};if($('createNext'))$('createNext').onclick=async()=>{try{let r=await api('create');location.search='?room='+r.id}catch(e){error(e)}};tick();}
 function tick(){if(!state||state.phase!=='vote')return;const t=Math.max(0,Math.ceil((state.deadline-Date.now()-offset)/1000));if($('timer'))$('timer').textContent=t?t+'초':'선택 시간 종료';document.querySelectorAll('[data-choice]').forEach(b=>b.disabled=!!state.answer||t===0||pending);if(!t&&$('wait'))$('wait').textContent='선택 시간이 끝났어요. 진행자의 결과 공유를 기다려주세요.'}
 async function choose(choice){if(pending)return;pending=true;tick();try{await api('answer',{q:state.q,choice});pending=false;lastKey='';while(polling)await new Promise(r=>setTimeout(r,40));await poll();if(state.q>=3&&state.answer&&!state.answer.reason)openReason()}catch(e){pending=false;error(e);tick()}}
 function openReason(){modalQ=state.q;$('picked').textContent=state.answer.choice+' · '+Q[state.q][state.answer.choice==='A'?1:2];$('reason').value='';$('modal').showModal();$('reason').focus()}
