@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음 카드 : 아이스브레이킹 - 70가지 감정으로 전하는 나의 이야기</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Gaegu (Handwriting) & Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#FAF7F2',
+                            card: '#FFFDF9',
+                            primary: '#F472B6',
+                            peach: '#FFEDD5',
+                            warmYellow: '#FEF3C7',
+                            softGreen: '#D1FAE5',
+                            softBlue: '#E0F2FE',
+                            textDark: '#334155',
+                            textMuted: '#64748B'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'sans-serif'],
+                        hand: ['"Gaegu"', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FAF7F2;
+            color: #334155;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-image: radial-gradient(#e5e7eb 0.75px, transparent 0.75px);
+            background-size: 16px 16px;
+        }
+        .font-handwriting {
+            font-family: 'Gaegu', cursive;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(220, 200, 180, 0.3), 0 8px 10px -6px rgba(220, 200, 180, 0.2);
+        }
+        .card-shadow-hover:hover {
+            box-shadow: 0 18px 30px -5px rgba(210, 180, 150, 0.4), 0 10px 12px -5px rgba(210, 180, 150, 0.3);
+            transform: translateY(-4px);
+        }
+        .drop-zone-active {
+            border-color: #F472B6 !important;
+            background-color: #FFF5F7 !important;
+            scale: 1.02;
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-pink-100 selection:text-pink-600">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-orange-100 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-400 via-amber-300 to-emerald-300 flex items-center justify-center text-white shadow-sm font-handwriting text-2xl font-bold">
+                    ♥
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                        마음 카드 : 아이스브레이킹 <span class="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full font-medium">70 Emotion Cards</span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Page Navigation Tabs -->
+            <div class="flex bg-slate-100/80 p-1 rounded-2xl border border-slate-200/60">
+                <button id="tab-btn-express" onclick="switchTab('express')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-pink-600 shadow-sm">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>1. 내 마음 표현하기</span>
+                </button>
+                <button id="tab-btn-share" onclick="switchTab('share')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>2. 함께 나누는 마음</span>
+                    <span id="badge-submission-count" class="bg-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full">
+
+        <!-- PAGE 1: EXPRESSION FORM -->
+        <section id="page-express" class="space-y-8 transition-all">
+            
+            <!-- Top Banner / User Name Input Card -->
+            <div class="bg-white rounded-3xl p-6 md:p-8 card-shadow border border-amber-100/80 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-pink-100 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
+                <div class="space-y-2 text-center md:text-left z-10 max-w-xl">
+                    <span class="inline-block text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200/60">
+                        ✨ 감정 카드 워크숍
+                    </span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">
+                        오늘 당신의 마음에 머무는 감정은 무엇인가요?
+                    </h2>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        60가지의 다양한 감정 캐릭터 카드 중에서 나의 마음을 가장 잘 담아낸 카드를 찾아 끌어다 놓거나 선택해보세요.
+                    </p>
+                </div>
+
+                <!-- Name Input Box -->
+                <div class="z-10 bg-amber-50/70 p-4 rounded-2xl border border-amber-200/60 w-full md:w-80 shadow-inner">
+                    <label for="user-name" class="block text-xs font-bold text-amber-800 mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-user text-amber-500"></i> 작성자 이름 (또는 닉네임) <span class="text-pink-500">*</span>
+                    </label>
+                    <input type="text" id="user-name" placeholder="예: 매홀중 최윤정" class="w-full px-4 py-2.5 bg-white rounded-xl border border-amber-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-400 font-medium text-sm transition">
+                </div>
+            </div>
+
+            <!-- Two Questions Container (Drop Zones) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- QUESTION 1 SLOT -->
+                <div class="bg-white rounded-3xl p-6 card-shadow border border-slate-100 flex flex-col justify-between transition-all hover:border-pink-200">
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-7 h-7 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-sm">1</span>
+                            <h3 class="font-bold text-lg text-slate-800">나의 오늘 하루를 표현하는 카드는?</h3>
+                        </div>
+
+                        <!-- Drop Target 1 -->
+                        <div id="drop-zone-1" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDrop(event, 1)"
+                             class="min-h-[200px] border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 p-4 flex flex-col items-center justify-center transition cursor-pointer relative group overflow-hidden"
+                             onclick="showCardSelectModal(1)">
+                            
+                            <div id="slot-1-empty" class="text-center py-6 space-y-2">
+                                <div class="w-14 h-14 rounded-full bg-pink-50 text-pink-400 flex items-center justify-center mx-auto text-2xl group-hover:scale-110 transition">
+                                    <i class="fa-regular fa-square-plus"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-600">아래 감정 카드를 끌어오거나 클릭하세요</p>
+                                <p class="text-xs text-slate-400">카드를 선택하여 내 하루를 표현해 보세요</p>
+                            </div>
+
+                            <div id="slot-1-content" class="hidden w-full flex flex-col items-center">
+                                <!-- Selected Card Preview rendered here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question 1 Reason Input (Shows after card selection) -->
+                    <div id="reason-box-1" class="hidden mt-4 pt-4 border-t border-slate-100 space-y-2 transition-all">
+                        <label for="reason-1" class="block text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span><i class="fa-solid fa-pen-nib text-pink-400 mr-1"></i> 이 카드를 선택한 이유는 무엇인가요?</span>
+                            <span class="text-[11px] text-slate-400 font-normal">자유롭게 서술해주세요</span>
+                        </label>
+                        <textarea id="reason-1" rows="3" placeholder="오늘 하루 어떤 경험이나 생각 때문에 이 감정을 느끼셨나요?..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none transition"></textarea>
+                    </div>
+                </div>
+
+                <!-- QUESTION 2 SLOT -->
+                <div class="bg-white rounded-3xl p-6 card-shadow border border-slate-100 flex flex-col justify-between transition-all hover:border-amber-200">
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-7 h-7 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm">2</span>
+                            <h3 class="font-bold text-lg text-slate-800">이번 연수에 참여하는 나의 마음은?</h3>
+                        </div>
+
+                        <!-- Drop Target 2 -->
+                        <div id="drop-zone-2" 
+                             ondragover="handleDragOver(event)" 
+                             ondragleave="handleDragLeave(event)" 
+                             ondrop="handleDrop(event, 2)"
+                             class="min-h-[200px] border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 p-4 flex flex-col items-center justify-center transition cursor-pointer relative group overflow-hidden"
+                             onclick="showCardSelectModal(2)">
+                            
+                            <div id="slot-2-empty" class="text-center py-6 space-y-2">
+                                <div class="w-14 h-14 rounded-full bg-amber-50 text-amber-400 flex items-center justify-center mx-auto text-2xl group-hover:scale-110 transition">
+                                    <i class="fa-regular fa-square-plus"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-600">아래 감정 카드를 끌어오거나 클릭하세요</p>
+                                <p class="text-xs text-slate-400">연수에 임하는 내 마음 카드를 골라보세요</p>
+                            </div>
+
+                            <div id="slot-2-content" class="hidden w-full flex flex-col items-center">
+                                <!-- Selected Card Preview rendered here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question 2 Reason Input (Shows after card selection) -->
+                    <div id="reason-box-2" class="hidden mt-4 pt-4 border-t border-slate-100 space-y-2 transition-all">
+                        <label for="reason-2" class="block text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span><i class="fa-solid fa-pen-nib text-amber-500 mr-1"></i> 이 카드를 선택한 이유는 무엇인가요?</span>
+                            <span class="text-[11px] text-slate-400 font-normal">자유롭게 서술해주세요</span>
+                        </label>
+                        <textarea id="reason-2" rows="3" placeholder="이번 연수에서 어떤 기대, 소망, 또는 솔직한 마음을 품고 계신가요?..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none transition"></textarea>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Submit Action Button -->
+            <div class="flex justify-center pt-2">
+                <button onclick="submitHeartCards()" class="px-10 py-4 bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 hover:from-pink-600 hover:to-amber-500 text-white text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 transition flex items-center gap-3">
+                    <i class="fa-solid fa-paper-plane text-xl"></i>
+                    <span>나의 마음 등록하기 및 나누기</span>
+                </button>
+            </div>
+
+            <!-- 70 Emotion Cards Deck Section -->
+            <div class="bg-white rounded-3xl p-6 md:p-8 card-shadow border border-slate-100 space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <span>🎨 70가지 감정 카드 보관함</span>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-semibold">총 70장</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">마음에 와닿는 감정을 찾아 마우스로 드래그하거나 카드를 클릭해 보세요.</p>
+                    </div>
+
+                    <!-- Category Filter Tabs & Search -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="relative w-full md:w-48">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+                            <input type="text" id="card-search-input" oninput="filterCards()" placeholder="감정 검색 (예: 감사)" class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+
+                        <div class="flex gap-1 overflow-x-auto hide-scrollbar w-full md:w-auto pt-1 md:pt-0" id="category-filter-container">
+                            <!-- Category Buttons generated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid of 60 Cards -->
+                <div id="emotion-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <!-- Cards dynamically injected here -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- PAGE 2: SHARED COMMUNITY GALLERY -->
+        <section id="page-share" class="hidden space-y-6">
+            
+            <div class="bg-gradient-to-r from-pink-100 via-amber-50 to-emerald-100 rounded-3xl p-6 md:p-8 card-shadow border border-orange-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="space-y-2 text-center md:text-left">
+                    <span class="inline-block text-xs font-bold text-pink-600 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full border border-pink-200">
+                        💌 함께 나누는 따뜻한 마음
+                    </span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800">
+                        연수 참여자들의 이야기 모음
+                    </h2>
+                    <p class="text-sm text-slate-600">
+                        서로의 오늘 하루와 연수에 임하는 감정을 읽어보고 따뜻한 응원의 공감을 남겨주세요.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-3 top-3 text-xs text-slate-400"></i>
+                        <input type="text" id="share-search-input" oninput="filterSubmissions()" placeholder="이름으로 검색..." class="pl-8 pr-4 py-2 bg-white rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-300 shadow-sm">
+                    </div>
+                    <button onclick="loadSubmissionsFromFirebase()" class="p-2.5 bg-white text-slate-600 hover:text-pink-600 rounded-xl border border-slate-200 shadow-sm transition" title="새로고침">
+                        <i class="fa-solid fa-rotate-right text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submissions Feed Container -->
+            <div id="submissions-feed" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Submissions injected here via JS -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="submissions-empty" class="hidden text-center py-16 bg-white rounded-3xl border border-dashed border-slate-200 card-shadow space-y-3">
+                <div class="w-16 h-16 rounded-full bg-orange-50 text-orange-400 flex items-center justify-center mx-auto text-3xl">
+                    <i class="fa-regular fa-comment-dots"></i>
+                </div>
+                <h4 class="text-lg font-bold text-slate-700">아직 등록된 마음 카드가 없습니다</h4>
+                <p class="text-xs text-slate-500">첫 번째로 내 마음을 등록하고 이야기의 물꼬를 터보세요!</p>
+                <button onclick="switchTab('express')" class="mt-2 px-5 py-2 bg-pink-500 text-white rounded-xl font-bold text-xs shadow-md hover:bg-pink-600 transition">
+                    마음 작성하러 가기
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 py-6 border-t border-slate-200/60 text-center text-xs text-slate-400">
+        <p>© 60 Emotion Cards Healing Workshop • 마음 따뜻한 하루 되세요 ✨</p>
+    </footer>
+
+    <!-- Card Select Modal (For Mobile / Easy Click Selection) -->
+    <div id="card-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 space-y-5 text-center shadow-2xl relative animate-float">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modal-card-preview" class="flex flex-col items-center">
+                <!-- Preview rendered here -->
+            </div>
+            <p id="modal-card-desc" class="text-xs text-slate-500 font-medium"></p>
+            
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button id="modal-btn-q1" onclick="applyModalSelection(1)" class="py-2.5 bg-pink-50 hover:bg-pink-100 text-pink-600 font-bold rounded-xl text-xs border border-pink-200 transition">
+                    1. 오늘 하루 카드로 선택
+                </button>
+                <button id="modal-btn-q2" onclick="applyModalSelection(2)" class="py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-600 font-bold rounded-xl text-xs border border-amber-200 transition">
+                    2. 연수 참여 카드로 선택
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+        <span id="toast-icon" class="text-pink-400 text-lg"><i class="fa-solid fa-circle-check"></i></span>
+        <span id="toast-message" class="text-sm font-medium">안내 메시지</span>
+    </div>
+
+    <!-- Firebase Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase state & variables
+        window.db = null;
+        window.auth = null;
+        window.currentUser = null;
+        window.appId = typeof __app_id !== 'undefined' ? __app_id : 'emotion-cards-workshop-default';
+
+        // Expose Firestore helper functions globally for classic script access
+        window.dbHelpers = {
+            collection,
+            doc,
+            setDoc,
+            onSnapshot,
+            updateDoc
+        };
+
+        async function initFirebase() {
+            try {
+                let firebaseConfig = null;
+                if (typeof __firebase_config !== 'undefined') {
+                    firebaseConfig = JSON.parse(__firebase_config);
+                } else {
+                    // Fallback config if environment variable absent
+                    firebaseConfig = {
+                        apiKey: "AIzaSyDemoConfigForEmotionCardsKey",
+                        authDomain: "demo-emotion-cards.firebaseapp.com",
+                        projectId: "demo-emotion-cards",
+                        storageBucket: "demo-emotion-cards.appspot.com",
+                        messagingSenderId: "123456789",
+                        appId: "1:123456789:web:demo"
+                    };
+                }
+
+                const app = initializeApp(firebaseConfig);
+                window.db = getFirestore(app);
+                window.auth = getAuth(app);
+
+                // Authentication step
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(window.auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(window.auth);
+                }
+
+                onAuthStateChanged(window.auth, (user) => {
+                    if (user) {
+                        window.currentUser = user;
+                        console.log("Firebase Auth Ready. User UID:", user.uid);
+                        loadSubmissionsFromFirebase();
+                    }
+                });
+
+            } catch (err) {
+                console.warn("Firebase initialization skipped or failed, using local mode:", err);
+                // Fallback local submissions loading
+                window.renderSubmissions(window.localSubmissions || []);
+            }
+        }
+
+        window.initFirebase = initFirebase;
+        initFirebase();
+    </script>
+
+    <script>
+        /* 
+           70 DISTINCT EMOTION CARDS
+           Matching the reference image style: cute fluffy character blobs, expressive eyes/mouths, pastel card backgrounds, Korean emotion word + English subtitle.
+        */
+        const EMOTION_CARDS = [
+            // --- 긍정 / 기쁨 (Joyful & Positive - 20) ---
+            { id: 1, name: "기대돼", eng: "Excited", cat: "positive", bg: "#FFE2E9", color: "#FF4D79", shape: "heartBlob", eye: "happy", mouth: "openSmile", limb: "cheer", accent: "sparkle" },
+            { id: 2, name: "열정적이야", eng: "Passionate", cat: "positive", bg: "#FFE8E0", color: "#FF5E36", shape: "fluffyFlame", eye: "wink", mouth: "bigGrin", limb: "run", accent: "fire" },
+            { id: 3, name: "감사해", eng: "Grateful", cat: "positive", bg: "#FFEEDD", color: "#FF8C33", shape: "squishyBox", eye: "peaceful", mouth: "gentleSmile", limb: "bow", accent: "warmGlow" },
+            { id: 4, name: "재미있어", eng: "Fun", cat: "positive", bg: "#FFF4D4", color: "#FFB020", shape: "starBlob", eye: "laughing", mouth: "openSmile", limb: "dance", accent: "sparkle" },
+            { id: 5, name: "홀가분해", eng: "Relieved", cat: "positive", bg: "#FFFFD1", color: "#E0C800", shape: "cloudBlob", eye: "happy", mouth: "laugh", limb: "jump", accent: "breeze" },
+            { id: 6, name: "뿌듯해", eng: "Proud", cat: "positive", bg: "#FEF7C3", color: "#EAB308", shape: "mountainBlob", eye: "confident", mouth: "proudSmirk", limb: "fistBump", accent: "star" },
+            { id: 7, name: "대견해", eng: "Admirable", cat: "positive", bg: "#ECFCCB", color: "#84CC16", shape: "treeBlob", eye: "joy", mouth: "smile", limb: "thumbsUp", accent: "sparkle" },
+            { id: 8, name: "설레", eng: "Thrilled", cat: "positive", bg: "#FCE7F3", color: "#EC4899", shape: "heartBlob", eye: "sparkleEyes", mouth: "gasp", limb: "flutter", accent: "heart" },
+            { id: 9, name: "행복해", eng: "Happy", cat: "positive", bg: "#FFE4E6", color: "#F43F5E", shape: "roundedBlob", eye: "happyArc", mouth: "wideSmile", limb: "openArms", accent: "hearts" },
+            { id: 10, name: "신나", eng: "Ecstatic", cat: "positive", bg: "#FEF08A", color: "#CA8A04", shape: "starBlob", eye: "joy", mouth: "openSmile", limb: "jumpHigh", accent: "music" },
+            { id: 11, name: "벅차올라", eng: "Overwhelmed", cat: "positive", bg: "#FFEDD5", color: "#F97316", shape: "cloudBlob", eye: "sparkleEyes", mouth: "openSmile", limb: "hugSelf", accent: "stars" },
+            { id: 12, name: "활기차", eng: "Energetic", cat: "positive", bg: "#FEFDCD", color: "#10B981", shape: "fluffyFlame", eye: "wink", mouth: "bigGrin", limb: "run", accent: "lightning" },
+            { id: 13, name: "희망차", eng: "Hopeful", cat: "positive", bg: "#E0F2FE", color: "#0284C7", shape: "cloudBlob", eye: "lookingUp", mouth: "softSmile", limb: "reachUp", accent: "sunbeam" },
+            { id: 14, name: "흐뭇해", eng: "Pleased", cat: "positive", bg: "#FFEDD5", color: "#FB923C", shape: "squishyBox", eye: "peaceful", mouth: "content", limb: "patSelf", accent: "warm" },
+            { id: 15, name: "당당해", eng: "Confident", cat: "positive", bg: "#FEF3C7", color: "#D97706", shape: "mountainBlob", eye: "determined", mouth: "smirk", limb: "handsOnHips", accent: "crown" },
+            { id: 61, name: "신비로워", eng: "Wondrous", cat: "positive", bg: "#F3E8FF", color: "#A855F7", shape: "starBlob", eye: "sparkleEyes", mouth: "openSmile", limb: "cheer", accent: "sparkle" },
+            { id: 62, name: "감동적이야", eng: "Touched", cat: "positive", bg: "#FFE4E6", color: "#F43F5E", shape: "heartBlob", eye: "closedHappy", mouth: "gentleSmile", limb: "hugHeart", accent: "heart" },
+            { id: 63, name: "자랑스러워", eng: "Proud", cat: "positive", bg: "#FEF08A", color: "#EAB308", shape: "mountainBlob", eye: "confident", mouth: "proudSmirk", limb: "thumbsUp", accent: "crown" },
+            { id: 64, name: "반가워", eng: "Delighted", cat: "positive", bg: "#FFEDD5", color: "#F97316", shape: "roundedBlob", eye: "happy", mouth: "wideSmile", limb: "openArms", accent: "sparkle" },
+            { id: 65, name: "생기있어", eng: "Vibrant", cat: "positive", bg: "#DCFCE7", color: "#16A34A", shape: "fluffyFlame", eye: "wink", mouth: "bigGrin", limb: "dance", accent: "lightning" },
+
+            // --- 평온 / 안정 (Calm & Peaceful - 20) ---
+            { id: 16, name: "편안해", eng: "Comfortable", cat: "peaceful", bg: "#DCFCE7", color: "#22C55E", shape: "pillowBlob", eye: "sleeping", mouth: "softSmile", limb: "sit", accent: "zzz" },
+            { id: 17, name: "고요해", eng: "Serene", cat: "peaceful", bg: "#E0E7FF", color: "#6366F1", shape: "dropBlob", eye: "closed", mouth: "line", limb: "meditate", accent: "leaf" },
+            { id: 18, name: "안심돼", eng: "Reassured", cat: "peaceful", bg: "#CCFBF1", color: "#14B8A6", shape: "squishyBox", eye: "closedHappy", mouth: "sigh", limb: "handOnChest", accent: "shield" },
+            { id: 19, name: "느긋해", eng: "Relaxed", cat: "peaceful", bg: "#D1FAE5", color: "#10B981", shape: "pillowBlob", eye: "relaxed", mouth: "smile", limb: "lieDown", accent: "tea" },
+            { id: 20, name: "따뜻해", eng: "Warm-hearted", cat: "peaceful", bg: "#FFEDD5", color: "#EA580C", shape: "heartBlob", eye: "closedHappy", mouth: "softSmile", limb: "hugHeart", accent: "warmGlow" },
+            { id: 21, name: "아늑해", eng: "Cozy", cat: "peaceful", bg: "#FEF3C7", color: "#B45309", shape: "squishyBox", eye: "sleepy", mouth: "tinySmile", limb: "wrapped", accent: "coffee" },
+            { id: 22, name: "평화로워", eng: "Peaceful", cat: "peaceful", bg: "#E0F2FE", color: "#0369A1", shape: "cloudBlob", eye: "closed", mouth: "gentleSmile", limb: "float", accent: "cloud" },
+            { id: 23, name: "여유로워", eng: "Leisurely", cat: "peaceful", bg: "#E0F2FE", color: "#0284C7", shape: "pillowBlob", eye: "relaxed", mouth: "smile", limb: "sipping", accent: "drink" },
+            { id: 24, name: "담담해", eng: "Tranquil", cat: "peaceful", bg: "#F1F5F9", color: "#64748B", shape: "roundedBlob", eye: "dot", mouth: "flatLine", limb: "rest", accent: "stone" },
+            { id: 25, name: "든든해", eng: "Supported", cat: "peaceful", bg: "#ECFCCB", color: "#65A30D", shape: "mountainBlob", eye: "confident", mouth: "smile", limb: "crossArms", accent: "solid" },
+            { id: 26, name: "차분해", eng: "Calm", cat: "peaceful", bg: "#E2E8F0", color: "#475569", shape: "dropBlob", eye: "closed", mouth: "smallLine", limb: "sit", accent: "drop" },
+            { id: 27, name: "다정해", eng: "Tender", cat: "peaceful", bg: "#FCE7F3", color: "#DB2777", shape: "heartBlob", eye: "closedHappy", mouth: "softSmile", limb: "offerFlower", accent: "flower" },
+            { id: 28, name: "포근해", eng: "Snug", cat: "peaceful", bg: "#FEF3C7", color: "#D97706", shape: "pillowBlob", eye: "sleepy", mouth: "smile", limb: "hugPillow", accent: "blanket" },
+            { id: 29, name: "만족스러워", eng: "Satisfied", cat: "peaceful", bg: "#D1FAE5", color: "#059669", shape: "squishyBox", eye: "closedHappy", mouth: "content", limb: "pattedBelly", accent: "check" },
+            { id: 30, name: "자유로워", eng: "Free", cat: "peaceful", bg: "#E0F2FE", color: "#0284C7", shape: "starBlob", eye: "happy", mouth: "openSmile", limb: "spreadWings", accent: "bird" },
+            { id: 66, name: "조화로워", eng: "Harmonious", cat: "peaceful", bg: "#E0F2FE", color: "#0284C7", shape: "dropBlob", eye: "peaceful", mouth: "softSmile", limb: "meditate", accent: "leaf" },
+            { id: 67, name: "온화해", eng: "Gentle", cat: "peaceful", bg: "#FEF3C7", color: "#D97706", shape: "pillowBlob", eye: "closed", mouth: "gentleSmile", limb: "sit", accent: "warm" },
+            { id: 68, name: "안정돼", eng: "Stable", cat: "peaceful", bg: "#ECFCCB", color: "#65A30D", shape: "mountainBlob", eye: "closedHappy", mouth: "softSmile", limb: "crossArms", accent: "solid" },
+            { id: 69, name: "평온해", eng: "Placid", cat: "peaceful", bg: "#E0E7FF", color: "#6366F1", shape: "cloudBlob", eye: "relaxed", mouth: "smile", limb: "float", accent: "cloud" },
+            { id: 70, name: "너그러워", eng: "Generous", cat: "peaceful", bg: "#D1FAE5", color: "#10B981", shape: "squishyBox", eye: "happyArc", mouth: "content", limb: "offerFlower", accent: "flower" },
+
+            // --- 피로 / 우울 (Tired & Down - 15) ---
+            { id: 31, name: "피곤해", eng: "Tired", cat: "sad", bg: "#EDE9FE", color: "#7C3AED", shape: "squishyBox", eye: "droopy", mouth: "frownLine", limb: "slouch", accent: "spiral" },
+            { id: 32, name: "우울해", eng: "Depressed", cat: "sad", bg: "#DDD6FE", color: "#6D28D9", shape: "dropBlob", eye: "sadDown", mouth: "sadCurve", limb: "huggingKnees", accent: "rain" },
+            { id: 33, name: "지쳐", eng: "Exhausted", cat: "sad", bg: "#E2E8F0", color: "#64748B", shape: "meltedBlob", eye: "xEyes", mouth: "tongueOut", limb: "flatFloor", accent: "sweat" },
+            { id: 34, name: "허무해", eng: "Empty", cat: "sad", bg: "#F1F5F9", color: "#94A3B8", shape: "cloudBlob", eye: "hollowDot", mouth: "flatLine", limb: "hanging", accent: "wind" },
+            { id: 35, name: "외로워", eng: "Lonely", cat: "sad", bg: "#E0E7FF", color: "#4F46E5", shape: "roundedBlob", eye: "sadLookAway", mouth: "smallFrown", limb: "sitAlone", accent: "singleStar" },
+            { id: 36, name: "무기력해", eng: "Lethargic", cat: "sad", bg: "#F3E8FF", color: "#9333EA", shape: "meltedBlob", eye: "halfOpen", mouth: "waveLine", limb: "droopArms", accent: "batteryLow" },
+            { id: 37, name: "서글퍼", eng: "Sorrowful", cat: "sad", bg: "#DBEAFE", color: "#2563EB", shape: "dropBlob", eye: "tears", mouth: "quiver", limb: "wipeTear", accent: "teardrop" },
+            { id: 38, name: "쓸쓸해", eng: "Lonesome", cat: "sad", bg: "#E0F2FE", color: "#0369A1", shape: "squishyBox", eye: "sadDown", mouth: "frown", limb: "coatClutched", accent: "fallLeaf" },
+            { id: 39, name: "먹먹해", eng: "Heavy-hearted", cat: "sad", bg: "#CBD5E1", color: "#475569", shape: "cloudBlob", eye: "closedSad", mouth: "compressed", limb: "holdChest", accent: "cloudRain" },
+            { id: 40, name: "씁쓸해", eng: "Bitter", cat: "sad", bg: "#E2E8F0", color: "#475569", shape: "squishyBox", eye: "sideGlance", mouth: "skewedMouth", limb: "shrug", accent: "coffeeBean" },
+            { id: 41, name: "속상해", eng: "Heartbroken", cat: "sad", bg: "#FCE7F3", color: "#BE185D", shape: "heartBlob", eye: "teary", mouth: "frown", limb: "holdHeart", accent: "brokenHeart" },
+            { id: 42, name: "답답해", eng: "Frustrated", cat: "sad", bg: "#F3E8FF", color: "#7E22CE", shape: "squishyBox", eye: "squeezed", mouth: "wavyLine", limb: "headInHands", accent: "steam" },
+            { id: 43, name: "서운해", eng: "Disappointed", cat: "sad", bg: "#DBEAFE", color: "#1D4ED8", shape: "roundedBlob", eye: "sadTear", mouth: "pout", limb: "huggingKnees", accent: "doodleSpin" },
+            { id: 44, name: "막막해", eng: "At a loss", cat: "sad", bg: "#C7D2FE", color: "#3730A3", shape: "squishyBox", eye: "worriedDots", mouth: "wavy", limb: "wandering", accent: "fog" },
+            { id: 45, name: "무거워", eng: "Heavy", cat: "sad", bg: "#E2E8F0", color: "#334155", shape: "mountainBlob", eye: "closedDown", mouth: "straightLine", limb: "carryingStone", accent: "rock" },
+
+            // --- 불안 / 분노 / 혼란 (Anxious & Angry - 15) ---
+            { id: 46, name: "억울해", eng: "Aggrieved", cat: "angry", bg: "#FCE7F3", color: "#991B1B", shape: "fluffyFlame", eye: "angryTears", mouth: "wideShout", limb: "armCrossed", accent: "angerMark" },
+            { id: 47, name: "짜증나", eng: "Annoyed", cat: "angry", bg: "#FEE2E2", color: "#DC2626", shape: "spikyBlob", eye: "glare", mouth: "gritTeeth", limb: "stomp", accent: "sparks" },
+            { id: 48, name: "화가나", eng: "Angry", cat: "angry", bg: "#FECACA", color: "#B91C1C", shape: "fluffyFlame", eye: "furious", mouth: "openShout", limb: "fistsUp", accent: "fireBurst" },
+            { id: 49, name: "두려워", eng: "Fearful", cat: "angry", bg: "#DDD6FE", color: "#5B21B6", shape: "dropBlob", eye: "wideOpen", mouth: "gaspO", limb: "shivering", accent: "ghost" },
+            { id: 50, name: "불안해", eng: "Anxious", cat: "angry", bg: "#E0E7FF", color: "#4338CA", shape: "spikyBlob", eye: "darting", mouth: "wavyLine", limb: "bitingNails", accent: "tremble" },
+            { id: 51, name: "긴장돼", eng: "Nervous", cat: "angry", bg: "#E2E8F0", color: "#475569", shape: "squishyBox", eye: "wideSweat", mouth: "smallLine", limb: "stiff", accent: "sweatDrops" },
+            { id: 52, name: "조급해", eng: "Hasty", cat: "angry", bg: "#FFEDD5", color: "#C2410C", shape: "fluffyFlame", eye: "focused", mouth: "openBreath", limb: "sprint", accent: "windLines" },
+            { id: 53, name: "혼란스러워", eng: "Confused", cat: "angry", bg: "#F3E8FF", color: "#6B21A8", shape: "spikyBlob", eye: "dizzySwirl", mouth: "zigzag", limb: "scratchHead", accent: "question" },
+            { id: 54, name: "부끄러워", eng: "Shy", cat: "angry", bg: "#FCE7F3", color: "#F43F5E", shape: "roundedBlob", eye: "lookingDown", mouth: "blushSmile", limb: "coverFace", accent: "blushCircles" },
+            { id: 55, name: "억눌려", eng: "Suppressed", cat: "angry", bg: "#F1F5F9", color: "#581C87", shape: "squishyBox", eye: "pressedClosed", mouth: "tightLine", limb: "bound", accent: "chains" },
+            { id: 56, name: "민망해", eng: "Awkward", cat: "angry", bg: "#EDE9FE", color: "#6D28D9", shape: "roundedBlob", eye: "sideGlanceSweat", mouth: "awkwardSmile", limb: "scratchNeck", accent: "sweat" },
+            { id: 57, name: "어리둥절해", eng: "Bewildered", cat: "angry", bg: "#E0F2FE", color: "#0369A1", shape: "starBlob", eye: "oneBigOneSmall", mouth: "openO", limb: "openHands", accent: "exclamation" },
+            { id: 58, name: "걱정돼", eng: "Worried", cat: "angry", bg: "#E0E7FF", color: "#3730A3", shape: "cloudBlob", eye: "browFrown", mouth: "wavy", limb: "handOnCheek", accent: "darkCloud" },
+            { id: 59, name: "억지스러워", eng: "Strained", cat: "angry", bg: "#FFE4E6", color: "#9F1239", shape: "squishyBox", eye: "forcedOpen", mouth: "forcedGrimace", limb: "stiffArms", accent: "stressMark" },
+            { id: 60, name: "후회돼", eng: "Regretful", cat: "angry", bg: "#F1F5F9", color: "#334155", shape: "dropBlob", eye: "closedSad", mouth: "frown", limb: "headInHand", accent: "sigh" }
+        ];
+
+        /* Categories metadata */
+        const CATEGORIES = [
+            { id: "all", name: "전체 (70)", icon: "✨" },
+            { id: "positive", name: "😊 긍정/기쁨", icon: "😊" },
+            { id: "peaceful", name: "🌿 평온/안정", icon: "🌿" },
+            { id: "sad", name: "🌧️ 피로/우울", icon: "🌧️" },
+            { id: "angry", name: "🔥 불안/분노", icon: "🔥" }
+        ];
+
+        let selectedCategory = "all";
+        let activeModalCard = null;
+
+        // Current user selection state
+        let currentSelection = {
+            card1: null,
+            reason1: "",
+            card2: null,
+            reason2: "",
+            userName: ""
+        };
+
+        // SVG Character Builder function matching reference image fluffy/hand-drawn style
+        function generateCharacterSVG(card) {
+            const color = card.color;
+
+            // Generate fluffy organic body path based on shape type
+            let bodyPath = "";
+            switch (card.shape) {
+                case "heartBlob":
+                    bodyPath = "M 50,25 C 35,10 15,25 20,48 C 25,70 50,88 50,88 C 50,88 75,70 80,48 C 85,25 65,10 50,25 Z";
+                    break;
+                case "fluffyFlame":
+                    bodyPath = "M 50,15 C 65,12 80,30 78,50 C 82,70 70,88 50,88 C 30,88 18,70 22,50 C 20,30 35,12 50,15 Z";
+                    break;
+                case "cloudBlob":
+                    bodyPath = "M 30,35 C 20,35 15,48 22,60 C 15,72 28,85 45,85 C 60,85 75,82 82,68 C 88,52 80,35 68,35 C 60,22 40,22 30,35 Z";
+                    break;
+                case "squishyBox":
+                    bodyPath = "M 25,25 C 40,20 60,20 75,25 C 85,40 85,60 75,75 C 60,85 40,85 25,75 C 15,60 15,40 25,25 Z";
+                    break;
+                case "starBlob":
+                    bodyPath = "M 50,15 C 58,30 75,25 78,40 C 90,50 82,68 75,78 C 62,85 50,88 38,82 C 22,80 15,65 22,50 C 18,35 35,30 50,15 Z";
+                    break;
+                case "spikyBlob":
+                    bodyPath = "M 50,18 C 62,15 72,28 78,38 C 88,48 85,65 75,78 C 62,85 48,88 35,82 C 20,78 15,60 20,45 C 18,30 35,20 50,18 Z";
+                    break;
+                case "dropBlob":
+                    bodyPath = "M 50,15 C 68,38 82,55 78,70 C 72,88 28,88 22,70 C 18,55 32,38 50,15 Z";
+                    break;
+                default: // roundedBlob
+                    bodyPath = "M 50,20 C 75,20 85,38 85,55 C 85,75 72,85 50,85 C 28,85 15,75 15,55 C 15,38 25,20 50,20 Z";
+                    break;
+            }
+
+            // Facial expression paths
+            let faceSVG = "";
+            switch (card.eye) {
+                case "happy":
+                case "happyArc":
+                    faceSVG += `<path d="M 36,45 Q 42,37 48,45 M 52,45 Q 58,37 64,45" stroke="#1E293B" stroke-width="3.5" stroke-linecap="round" fill="none" />`;
+                    break;
+                case "wink":
+                    faceSVG += `<path d="M 36,45 Q 42,38 48,45" stroke="#1E293B" stroke-width="3.5" stroke-linecap="round" fill="none" />
+                                <circle cx="58" cy="43" r="3.5" fill="#1E293B" />`;
+                    break;
+                case "peaceful":
+                case "closed":
+                case "sleeping":
+                    faceSVG += `<path d="M 35,46 Q 42,51 48,46 M 52,46 Q 58,51 64,46" stroke="#1E293B" stroke-width="3" stroke-linecap="round" fill="none" />`;
+                    break;
+                case "laughing":
+                case "closedHappy":
+                    faceSVG += `<path d="M 35,43 L 45,47 L 35,50 M 65,43 L 55,47 L 65,50" stroke="#1E293B" stroke-width="3" stroke-linecap="round" fill="none" />`;
+                    break;
+                case "sparkleEyes":
+                    faceSVG += `<text x="34" y="48" font-size="12" fill="#1E293B">★</text><text x="54" y="48" font-size="12" fill="#1E293B">★</text>`;
+                    break;
+                case "angryTears":
+                case "furious":
+                    faceSVG += `<path d="M 34,40 L 46,47 M 66,40 L 54,47" stroke="#1E293B" stroke-width="4" stroke-linecap="round" />
+                                <circle cx="40" cy="48" r="3" fill="#1E293B" /><circle cx="60" cy="48" r="3" fill="#1E293B" />`;
+                    break;
+                case "sadDown":
+                case "tears":
+                    faceSVG += `<path d="M 36,43 Q 41,39 46,43 M 54,43 Q 59,39 64,43" stroke="#1E293B" stroke-width="3" stroke-linecap="round" fill="none" />
+                                <circle cx="41" cy="48" r="2.5" fill="#1E293B" /><circle cx="59" cy="48" r="2.5" fill="#1E293B" />
+                                <path d="M 64,52 C 64,56 60,56 60,52 Z" fill="#38BDF8" />`;
+                    break;
+                case "xEyes":
+                    faceSVG += `<path d="M 36,41 L 44,49 M 44,41 L 36,49 M 56,41 L 64,49 M 64,41 L 56,49" stroke="#1E293B" stroke-width="3.5" stroke-linecap="round" />`;
+                    break;
+                default: // Standard cute dots
+                    faceSVG += `<circle cx="40" cy="45" r="3.5" fill="#1E293B" /><circle cx="60" cy="45" r="3.5" fill="#1E293B" />`;
+                    break;
+            }
+
+            // Mouth
+            switch (card.mouth) {
+                case "openSmile":
+                case "wideSmile":
+                case "bigGrin":
+                    faceSVG += `<path d="M 38,54 Q 50,70 62,54 Z" fill="#E11D48" stroke="#1E293B" stroke-width="2.5" />`;
+                    break;
+                case "gentleSmile":
+                case "smile":
+                case "softSmile":
+                    faceSVG += `<path d="M 40,55 Q 50,63 60,55" stroke="#1E293B" stroke-width="3" stroke-linecap="round" fill="none" />`;
+                    break;
+                case "openShout":
+                case "wideShout":
+                    faceSVG += `<ellipse cx="50" cy="58" rx="10" ry="8" fill="#1E293B" />`;
+                    break;
+                case "frown":
+                case "sadCurve":
+                    faceSVG += `<path d="M 40,60 Q 50,52 60,60" stroke="#1E293B" stroke-width="3" stroke-linecap="round" fill="none" />`;
+                    break;
+                case "flatLine":
+                case "line":
+                    faceSVG += `<line x1="42" y1="57" x2="58" y2="57" stroke="#1E293B" stroke-width="3" stroke-linecap="round" />`;
+                    break;
+                case "wavyLine":
+                case "zigzag":
+                    faceSVG += `<path d="M 38,57 Q 44,53 50,57 T 62,57" stroke="#1E293B" stroke-width="3" fill="none" />`;
+                    break;
+                default:
+                    faceSVG += `<path d="M 42,56 Q 50,61 58,56" stroke="#1E293B" stroke-width="3" stroke-linecap="round" fill="none" />`;
+                    break;
+            }
+
+            // Limb overlay (cute white gloved hands & feet)
+            let limbsSVG = `
+                <!-- Legs -->
+                <path d="M 38,82 L 35,92 M 62,82 L 65,92" stroke="#1E293B" stroke-width="3.5" stroke-linecap="round" />
+                <ellipse cx="32" cy="93" rx="6" ry="3" fill="#FFFFFF" stroke="#1E293B" stroke-width="2" />
+                <ellipse cx="68" cy="93" rx="6" ry="3" fill="#FFFFFF" stroke="#1E293B" stroke-width="2" />
+                
+                <!-- Arms -->
+                <path d="M 20,55 Q 10,48 16,38 M 80,55 Q 90,48 84,38" stroke="#1E293B" stroke-width="3.5" stroke-linecap="round" fill="none" />
+                <circle cx="16" cy="38" r="4.5" fill="#FFFFFF" stroke="#1E293B" stroke-width="2" />
+                <circle cx="84" cy="38" r="4.5" fill="#FFFFFF" stroke="#1E293B" stroke-width="2" />
+            `;
+
+            return `
+                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                    <!-- Fluffy Character Body -->
+                    <path d="${bodyPath}" fill="${color}" stroke="#1E293B" stroke-width="3.5" stroke-linejoin="round" />
+                    <!-- Limbs -->
+                    ${limbsSVG}
+                    <!-- Face Expression -->
+                    ${faceSVG}
+                </svg>
+            `;
+        }
+
+        /* Render 60 Cards in the Grid */
+        function renderCardsGrid() {
+            const grid = document.getElementById("emotion-cards-grid");
+            const searchVal = document.getElementById("card-search-input")?.value.toLowerCase().trim() || "";
+            
+            grid.innerHTML = "";
+
+            const filtered = EMOTION_CARDS.filter(card => {
+                const matchCategory = (selectedCategory === "all") || (card.cat === selectedCategory);
+                const matchSearch = card.name.toLowerCase().includes(searchVal) || card.eng.toLowerCase().includes(searchVal);
+                return matchCategory && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-400 font-medium">
+                        <i class="fa-solid fa-ghost text-3xl mb-2 text-slate-300"></i>
+                        <p>검색된 감정 카드가 없습니다.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(card => {
+                const cardEl = document.createElement("div");
+                cardEl.className = `card-shadow-hover bg-white rounded-2xl p-3 border border-slate-100 flex flex-col items-center justify-between cursor-grab active:cursor-grabbing transition relative group select-none`;
+                cardEl.style.backgroundColor = card.bg;
+                cardEl.setAttribute("draggable", "true");
+                
+                // Drag Events
+                cardEl.ondragstart = (e) => handleDragStart(e, card.id);
+
+                // Click event opens quick pick modal or direct slot assign
+                cardEl.onclick = () => openCardModal(card);
+
+                cardEl.innerHTML = `
+                    <!-- Card Header / Title -->
+                    <div class="text-center w-full z-10">
+                        <h4 class="font-bold text-slate-800 text-sm md:text-base tracking-tight">${card.name}</h4>
+                        <span class="text-[10px] text-slate-500 block font-medium uppercase tracking-wider">${card.eng}</span>
+                    </div>
+
+                    <!-- Card Illustration -->
+                    <div class="w-20 h-20 md:w-24 md:h-24 my-2 flex items-center justify-center p-1 group-hover:scale-105 transition-transform">
+                        ${generateCharacterSVG(card)}
+                    </div>
+
+                    <!-- Bottom Tag -->
+                    <div class="w-full text-center pt-1 border-t border-slate-900/5">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/70 text-slate-700 backdrop-blur-xs">
+                            <i class="fa-solid fa-hand-pointer text-[9px] text-pink-400 mr-0.5"></i> 선택
+                        </span>
+                    </div>
+                `;
+
+                grid.appendChild(cardEl);
+            });
+        }
+
+        /* Render Filter Category Tabs */
+        function renderCategories() {
+            const container = document.getElementById("category-filter-container");
+            container.innerHTML = "";
+
+            CATEGORIES.forEach(cat => {
+                const btn = document.createElement("button");
+                const isActive = selectedCategory === cat.id;
+                btn.className = `px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                    isActive 
+                    ? "bg-slate-800 text-white shadow-sm" 
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`;
+                btn.innerText = cat.name;
+                btn.onclick = () => {
+                    selectedCategory = cat.id;
+                    renderCategories();
+                    renderCardsGrid();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        /* Filter trigger */
+        function filterCards() {
+            renderCardsGrid();
+        }
+
+        /* Drag & Drop Handlers */
+        function handleDragStart(event, cardId) {
+            event.dataTransfer.setData("text/plain", cardId.toString());
+            event.dataTransfer.effectAllowed = "copy";
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "copy";
+            event.currentTarget.classList.add("drop-zone-active");
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove("drop-zone-active");
+        }
+
+        function handleDrop(event, slotNum) {
+            event.preventDefault();
+            event.currentTarget.classList.remove("drop-zone-active");
+            
+            const cardIdStr = event.dataTransfer.getData("text/plain");
+            if (!cardIdStr) return;
+
+            const cardId = parseInt(cardIdStr, 10);
+            const card = EMOTION_CARDS.find(c => c.id === cardId);
+            if (card) {
+                assignCardToSlot(slotNum, card);
+            }
+        }
+
+        /* Assign card to slot 1 or 2 */
+        function assignCardToSlot(slotNum, card) {
+            if (slotNum === 1) {
+                currentSelection.card1 = card;
+                renderSlotContent(1, card);
+            } else if (slotNum === 2) {
+                currentSelection.card2 = card;
+                renderSlotContent(2, card);
+            }
+            showToast(`'${card.name}' 카드가 ${slotNum === 1 ? '오늘 하루' : '연수 참여'} 질문에 설정되었습니다! ✨`);
+        }
+
+        /* Render Card inside Drop Slot */
+        function renderSlotContent(slotNum, card) {
+            const emptyEl = document.getElementById(`slot-${slotNum}-empty`);
+            const contentEl = document.getElementById(`slot-${slotNum}-content`);
+            const reasonBox = document.getElementById(`reason-box-${slotNum}`);
+
+            emptyEl.classList.add("hidden");
+            contentEl.classList.remove("hidden");
+            if (reasonBox) reasonBox.classList.remove("hidden");
+
+            contentEl.innerHTML = `
+                <div class="relative w-full max-w-[200px] rounded-2xl p-4 card-shadow flex flex-col items-center text-center animate-float" style="background-color: ${card.bg}">
+                    <button onclick="clearSlot(event, ${slotNum})" class="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/80 hover:bg-white text-slate-500 hover:text-red-500 flex items-center justify-center text-xs shadow-sm transition" title="지우기">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <h4 class="font-bold text-slate-800 text-base mb-0.5">${card.name}</h4>
+                    <span class="text-[10px] text-slate-500 font-semibold uppercase mb-2">${card.eng}</span>
+                    <div class="w-24 h-24 my-1">
+                        ${generateCharacterSVG(card)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function clearSlot(event, slotNum) {
+            event.stopPropagation();
+            if (slotNum === 1) currentSelection.card1 = null;
+            if (slotNum === 2) currentSelection.card2 = null;
+
+            document.getElementById(`slot-${slotNum}-empty`).classList.remove("hidden");
+            document.getElementById(`slot-${slotNum}-content`).classList.add("hidden").innerHTML = "";
+
+            const reasonBox = document.getElementById(`reason-box-${slotNum}`);
+            const reasonInput = document.getElementById(`reason-${slotNum}`);
+            if (reasonBox) reasonBox.classList.add("hidden");
+            if (reasonInput) reasonInput.value = "";
+
+            showToast(`슬롯 ${slotNum}의 카드가 해제되었습니다.`);
+        }
+
+        /* Card Select Modal Logic for Mobile / Tapping */
+        function openCardModal(card) {
+            activeModalCard = card;
+            const modal = document.getElementById("card-modal");
+            const preview = document.getElementById("modal-card-preview");
+            const desc = document.getElementById("modal-card-desc");
+
+            preview.innerHTML = `
+                <div class="w-36 h-36 rounded-2xl p-4 flex flex-col items-center justify-center card-shadow" style="background-color: ${card.bg}">
+                    <h3 class="font-bold text-slate-800 text-lg">${card.name}</h3>
+                    <span class="text-xs text-slate-500 uppercase mb-2">${card.eng}</span>
+                    <div class="w-20 h-20">${generateCharacterSVG(card)}</div>
+                </div>
+            `;
+            desc.innerText = `'${card.name}' 카드를 어느 질문에 지정하시겠습니까?`;
+
+            modal.classList.remove("hidden");
+        }
+
+        function closeModal() {
+            document.getElementById("card-modal").classList.add("hidden");
+            activeModalCard = null;
+        }
+
+        function applyModalSelection(slotNum) {
+            if (activeModalCard) {
+                assignCardToSlot(slotNum, activeModalCard);
+                closeModal();
+            }
+        }
+
+        function showCardSelectModal(slotNum) {
+            // If empty slot clicked directly, show toast tip
+            if ((slotNum === 1 && !currentSelection.card1) || (slotNum === 2 && !currentSelection.card2)) {
+                showToast("아래 60가지 카드 중 원하는 카드를 클릭하거나 끌어다 놓으세요! 👇");
+            }
+        }
+
+        /* Submit Heart Cards */
+        async function submitHeartCards() {
+            const userNameInput = document.getElementById("user-name").value.trim();
+            const reason1Input = document.getElementById("reason-1").value.trim();
+            const reason2Input = document.getElementById("reason-2").value.trim();
+
+            if (!userNameInput) {
+                showToast("⚠️ 작성자 이름을 입력해주세요!", "warning");
+                document.getElementById("user-name").focus();
+                return;
+            }
+
+            if (!currentSelection.card1) {
+                showToast("⚠️ '오늘 하루를 표현하는 카드'를 선택해주세요!", "warning");
+                return;
+            }
+
+            if (!reason1Input) {
+                showToast("⚠️ 오늘 하루 카드를 선택한 이유를 작성해주세요!", "warning");
+                document.getElementById("reason-1").focus();
+                return;
+            }
+
+            if (!currentSelection.card2) {
+                showToast("⚠️ '연수 참여 마음 카드'를 선택해주세요!", "warning");
+                return;
+            }
+
+            if (!reason2Input) {
+                showToast("⚠️ 연수 마음 카드를 선택한 이유를 작성해주세요!", "warning");
+                document.getElementById("reason-2").focus();
+                return;
+            }
+
+            const submissionData = {
+                id: "sub_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+                userName: userNameInput,
+                card1: currentSelection.card1,
+                reason1: reason1Input,
+                card2: currentSelection.card2,
+                reason2: reason2Input,
+                timestamp: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                createdAt: Date.now(),
+                reactions: { heart: 0, cheer: 0, warm: 0 }
+            };
+
+            try {
+                if (window.db && window.dbHelpers) {
+                    // Firebase Firestore Path: /artifacts/{appId}/public/data/submissions
+                    const { collection, doc, setDoc } = window.dbHelpers;
+                    const colRef = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'submissions');
+                    const docRef = doc(colRef, submissionData.id);
+                    await setDoc(docRef, submissionData);
+                } else {
+                    // Local fallback storage
+                    if (!window.localSubmissions) window.localSubmissions = [];
+                    window.localSubmissions.unshift(submissionData);
+                    window.renderSubmissions(window.localSubmissions);
+                }
+
+                showToast("🎉 마음 카드가 성공적으로 공유되었습니다! 함께 나누는 페이지로 이동합니다.");
+                
+                // Clear input
+                document.getElementById("reason-1").value = "";
+                document.getElementById("reason-2").value = "";
+                
+                // Switch to Page 2
+                setTimeout(() => {
+                    switchTab('share');
+                }, 800);
+
+            } catch (err) {
+                console.error("Error saving submission:", err);
+                showToast("저장 도중 오류가 발생했으나 임시 공유에 반영되었습니다.");
+            }
+        }
+
+        /* Firebase Realtime Submissions Loader */
+        function loadSubmissionsFromFirebase() {
+            if (!window.db || !window.dbHelpers) {
+                window.renderSubmissions(window.localSubmissions || []);
+                return;
+            }
+
+            try {
+                const { collection, onSnapshot } = window.dbHelpers;
+                const colRef = collection(window.db, 'artifacts', window.appId, 'public', 'data', 'submissions');
+                
+                onSnapshot(colRef, (snapshot) => {
+                    const list = [];
+                    snapshot.forEach(doc => {
+                        list.push(doc.data());
+                    });
+
+                    // Sort locally by creation timestamp descending
+                    list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    window.renderSubmissions(list);
+                }, (error) => {
+                    console.error("Firestore onSnapshot error:", error);
+                    window.renderSubmissions(window.localSubmissions || []);
+                });
+            } catch (err) {
+                console.error("Firestore load error:", err);
+                window.renderSubmissions(window.localSubmissions || []);
+            }
+        }
+
+        window.loadSubmissionsFromFirebase = loadSubmissionsFromFirebase;
+
+        /* Render Community Submissions Cards Feed */
+        window.renderSubmissions = function(list) {
+            const feed = document.getElementById("submissions-feed");
+            const emptyState = document.getElementById("submissions-empty");
+            const badgeCount = document.getElementById("badge-submission-count");
+
+            const filterVal = document.getElementById("share-search-input")?.value.toLowerCase().trim() || "";
+
+            const filtered = list.filter(item => item.userName && item.userName.toLowerCase().includes(filterVal));
+
+            badgeCount.innerText = list.length;
+
+            if (filtered.length === 0) {
+                feed.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            emptyState.classList.add("hidden");
+            feed.classList.remove("hidden");
+            feed.innerHTML = "";
+
+            filtered.forEach(item => {
+                const card1 = item.card1;
+                const card2 = item.card2;
+
+                const itemEl = document.createElement("div");
+                itemEl.className = "bg-white rounded-3xl p-6 card-shadow border border-slate-100 flex flex-col justify-between space-y-5 transition hover:border-pink-200";
+
+                itemEl.innerHTML = `
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-400 to-amber-300 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                ${item.userName.charAt(0)}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-base">${item.userName}</h4>
+                                <span class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${item.timestamp || '방금 전'}</span>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-pink-500 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-100">
+                            연수 파트너
+                        </span>
+                    </div>
+
+                    <!-- Cards Q1 & Q2 Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Question 1 Result -->
+                        <div class="bg-slate-50/70 rounded-2xl p-3 border border-slate-100 space-y-2">
+                            <span class="text-[11px] font-bold text-slate-500 block">Q1. 오늘 하루 마음</span>
+                            <div class="flex items-center gap-3 p-2 rounded-xl" style="background-color: ${card1.bg}">
+                                <div class="w-12 h-12 flex-shrink-0">${generateCharacterSVG(card1)}</div>
+                                <div>
+                                    <h5 class="font-bold text-slate-800 text-sm">${card1.name}</h5>
+                                    <span class="text-[10px] text-slate-500 block font-medium">${card1.eng}</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 leading-relaxed font-sans">
+                                "${item.reason1}"
+                            </p>
+                        </div>
+
+                        <!-- Question 2 Result -->
+                        <div class="bg-slate-50/70 rounded-2xl p-3 border border-slate-100 space-y-2">
+                            <span class="text-[11px] font-bold text-slate-500 block">Q2. 연수 참여 마음</span>
+                            <div class="flex items-center gap-3 p-2 rounded-xl" style="background-color: ${card2.bg}">
+                                <div class="w-12 h-12 flex-shrink-0">${generateCharacterSVG(card2)}</div>
+                                <div>
+                                    <h5 class="font-bold text-slate-800 text-sm">${card2.name}</h5>
+                                    <span class="text-[10px] text-slate-500 block font-medium">${card2.eng}</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 leading-relaxed font-sans">
+                                "${item.reason2}"
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- Warm Reaction Buttons Footer -->
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                        <span class="font-medium">공감 나누기:</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="addReaction('${item.id}', 'heart', this)" class="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-600 font-bold transition flex items-center gap-1.5">
+                                ❤️ <span class="reaction-count">${(item.reactions && item.reactions.heart) || 0}</span>
+                            </button>
+                            <button onclick="addReaction('${item.id}', 'cheer', this)" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold transition flex items-center gap-1.5">
+                                👏 <span class="reaction-count">${(item.reactions && item.reactions.cheer) || 0}</span>
+                            </button>
+                            <button onclick="addReaction('${item.id}', 'warm', this)" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold transition flex items-center gap-1.5">
+                                ☕ <span class="reaction-count">${(item.reactions && item.reactions.warm) || 0}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                feed.appendChild(itemEl);
+            });
+        };
+
+        function filterSubmissions() {
+            if (window.localSubmissions || window.db) {
+                loadSubmissionsFromFirebase();
+            }
+        }
+
+        /* Interactive Reaction Trigger */
+        async function addReaction(submissionId, type, btnEl) {
+            const countSpan = btnEl.querySelector(".reaction-count");
+            let currentVal = parseInt(countSpan.innerText, 10) || 0;
+            countSpan.innerText = currentVal + 1;
+
+            btnEl.classList.add("scale-125");
+            setTimeout(() => btnEl.classList.remove("scale-125"), 200);
+
+            showToast("따뜻한 마음 표현이 전송되었습니다! ❤️");
+
+            if (window.db && window.dbHelpers) {
+                try {
+                    const { doc, updateDoc } = window.dbHelpers;
+                    const docRef = doc(window.db, 'artifacts', window.appId, 'public', 'data', 'submissions', submissionId);
+                    const fieldKey = `reactions.${type}`;
+                    await updateDoc(docRef, {
+                        [fieldKey]: currentVal + 1
+                    });
+                } catch (e) {
+                    console.warn("Reaction update failed:", e);
+                }
+            }
+        }
+
+        /* Tab Switcher */
+        function switchTab(tab) {
+            const expressPage = document.getElementById("page-express");
+            const sharePage = document.getElementById("page-share");
+
+            const expressBtn = document.getElementById("tab-btn-express");
+            const shareBtn = document.getElementById("tab-btn-share");
+
+            if (tab === 'express') {
+                expressPage.classList.remove("hidden");
+                sharePage.classList.add("hidden");
+
+                expressBtn.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-pink-600 shadow-sm";
+                shareBtn.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900";
+            } else {
+                expressPage.classList.add("hidden");
+                sharePage.classList.remove("hidden");
+
+                shareBtn.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-white text-pink-600 shadow-sm";
+                expressBtn.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900";
+
+                loadSubmissionsFromFirebase();
+            }
+        }
+
+        /* Toast Helper */
+        function showToast(msg, type = "info") {
+            const toast = document.getElementById("toast");
+            const messageEl = document.getElementById("toast-message");
+            const iconEl = document.getElementById("toast-icon");
+
+            messageEl.innerText = msg;
+            if (type === "warning") {
+                iconEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>`;
+            } else {
+                iconEl.innerHTML = `<i class="fa-solid fa-circle-check text-pink-400"></i>`;
+            }
+
+            toast.classList.remove("opacity-0", "pointer-events-none", "translate-y-4");
+
+            setTimeout(() => {
+                toast.classList.add("opacity-0", "pointer-events-none", "translate-y-4");
+            }, 3000);
+        }
+
+        // Make functions globally reachable
+        window.switchTab = switchTab;
+        window.filterCards = filterCards;
+        window.handleDragStart = handleDragStart;
+        window.handleDragOver = handleDragOver;
+        window.handleDragLeave = handleDragLeave;
+        window.handleDrop = handleDrop;
+        window.clearSlot = clearSlot;
+        window.showCardSelectModal = showCardSelectModal;
+        window.openCardModal = openCardModal;
+        window.closeModal = closeModal;
+        window.applyModalSelection = applyModalSelection;
+        window.submitHeartCards = submitHeartCards;
+        window.filterSubmissions = filterSubmissions;
+        window.addReaction = addReaction;
+
+        // On Page Load Initialization
+        window.onload = function() {
+            renderCategories();
+            renderCardsGrid();
+        };
+    </script>
+</body>
+</html>
