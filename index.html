@@ -285,6 +285,7 @@
                         <i class="fa-solid fa-search absolute left-3 top-3 text-xs text-slate-400"></i>
                         <input type="text" id="share-search-input" oninput="filterSubmissions()" placeholder="이름으로 검색..." class="pl-8 pr-4 py-2 bg-white rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-300 shadow-sm">
                     </div>
+                    <button id="admin-toggle" onclick="toggleAdmin()" class="px-3 py-2 bg-white rounded-xl text-xs border border-slate-200">관리자 로그인</button>
                     <button onclick="loadSubmissionsFromFirebase()" class="p-2.5 bg-white text-slate-600 hover:text-pink-600 rounded-xl border border-slate-200 shadow-sm transition" title="새로고침">
                         <i class="fa-solid fa-rotate-right text-sm"></i>
                     </button>
@@ -339,6 +340,27 @@
         </div>
     </div>
 
+    <style>dialog::backdrop { background: rgb(15 23 42 / 0.4); backdrop-filter: blur(3px); }</style>
+    <dialog id="reason-dialog" aria-labelledby="reason-dialog-title" class="rounded-3xl p-6 w-[calc(100%-2rem)] max-w-md shadow-2xl">
+        <div class="flex justify-between items-start gap-3 mb-4">
+            <div><p id="reason-dialog-question" class="text-xs text-pink-600 mb-2"></p>
+            <h3 id="reason-dialog-title" class="font-bold text-lg">이 카드를 선택한 이유는 무엇인가요?</h3></div>
+            <button onclick="closeReasonDialog()" aria-label="닫기" class="text-slate-500 p-2">✕</button>
+        </div>
+        <textarea id="reason-dialog-input" maxlength="2000" rows="5" oninput="syncReasonDraft()" class="w-full p-3 border rounded-xl text-sm" placeholder="내 마음을 자유롭게 적어주세요."></textarea>
+        <p class="text-xs text-slate-500 mt-2">작성한 내용은 입력란에 반영됩니다. 최종 등록 버튼을 눌러 공유해주세요.</p>
+        <button onclick="saveReasonDialog()" class="w-full mt-4 py-3 bg-pink-500 text-white font-bold rounded-xl">이유 작성 완료</button>
+    </dialog>
+    <dialog id="admin-dialog" aria-labelledby="admin-title" class="rounded-3xl p-6 w-[calc(100%-2rem)] max-w-sm shadow-2xl">
+        <form onsubmit="loginAdmin(event)" class="space-y-4">
+            <div class="flex justify-between"><h3 id="admin-title" class="font-bold text-lg">관리자 로그인</h3><button type="button" onclick="document.getElementById('admin-dialog').close()" aria-label="닫기">✕</button></div>
+            <label class="block text-sm">이메일<input id="admin-email" type="email" autocomplete="username" required class="block w-full border rounded-xl p-3 mt-1"></label>
+            <label class="block text-sm">비밀번호<input id="admin-password" type="password" autocomplete="current-password" required class="block w-full border rounded-xl p-3 mt-1"></label>
+            <p id="admin-error" role="alert" class="text-xs text-red-600"></p>
+            <button id="admin-login-submit" class="w-full bg-pink-500 text-white py-3 rounded-xl font-bold">로그인</button>
+        </form>
+    </dialog>
+
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
         <span id="toast-icon" class="text-pink-400 text-lg"><i class="fa-solid fa-circle-check"></i></span>
@@ -351,7 +373,13 @@
     2. Authentication > 로그인 방법 > 익명 사용 설정.
     3. Firestore Database > 데이터베이스 만들기 (기본 데이터베이스).
     4. Firestore > 규칙에 아래 규칙을 게시.
-    5. 이 파일을 index.html로 GitHub Pages 또는 웹 서버에 배포.
+    5. 관리자 기능: Authentication에서 이메일/비밀번호 로그인 활성화.
+       사용자 탭 > 사용자 추가에서 관리자 이메일/비밀번호 계정 생성, UID 복사.
+       Firestore 데이터 > 컬렉션 admins 생성 > 문서 ID에 관리자 UID 입력.
+       필드 enabled (boolean) = true 를 추가하여 문서 저장.
+       관리자 권한은 admins 문서의 존재로 결정됩니다 (해제 시 문서 삭제).
+       앱의 관리자 로그인에서 생성한 계정으로 로그인. 비밀번호는 코드에 넣지 않습니다.
+    6. 이 파일을 index.html로 GitHub Pages 또는 웹 서버에 배포.
     같은 WORKSHOP_ID를 쓰는 모든 참여자가 같은 목록을 봅니다.
     아래 규칙은 익명 로그인한 모든 이용자에게 이 워크숍 목록을 공개합니다.
     별도 참여자 제한이 필요한 경우 인증/접근 제어를 추가해야 합니다.
@@ -359,6 +387,10 @@
     rules_version = '2';
     service cloud.firestore {
       match /databases/{database}/documents {
+        match /admins/{uid} {
+          allow get: if request.auth != null && request.auth.uid == uid;
+          allow list, write: if false;
+        }
         match /workshops/{workshopId}/submissions/{submissionId} {
           allow read: if request.auth != null;
           allow create: if request.auth != null
@@ -393,15 +425,16 @@
             || (request.resource.data.reactions.warm == resource.data.reactions.warm + 1
               && request.resource.data.reactions.heart == resource.data.reactions.heart
               && request.resource.data.reactions.cheer == resource.data.reactions.cheer));
-          allow delete: if false;
+          allow delete: if request.auth != null
+            && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
         }
       }
     }
     -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, increment, serverTimestamp, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ★ Firebase 콘솔에서 받은 firebaseConfig 객체로 아래 객체를 교체하세요.
         const firebaseConfig = {
@@ -414,7 +447,7 @@
         };
         // ★ 연수별로 값을 바꾸면 참여자 목록을 분리할 수 있습니다.
         window.appId = 'emotion-cards-workshop-2026';
-        window.dbHelpers = { collection, doc, setDoc, onSnapshot, updateDoc, increment, serverTimestamp };
+        window.dbHelpers = { collection, doc, setDoc, onSnapshot, updateDoc, increment, serverTimestamp, getDoc, deleteDoc };
         window.firebaseReady = false;
         function setStatus(message) {
             document.getElementById('firebase-status').textContent = message;
@@ -427,6 +460,57 @@
             setStatus(message);
             return message;
         };
+        window.isAdmin = false;
+        window.refreshAdmin = async function() {
+            window.isAdmin = false;
+            if (window.currentUser && !window.currentUser.isAnonymous) {
+                window.isAdmin = (await getDoc(doc(window.db, 'admins', window.currentUser.uid))).exists();
+            }
+            document.getElementById('admin-toggle').textContent = window.isAdmin ? '관리자 로그아웃' : '관리자 로그인';
+            window.renderSubmissions(window.submissionsCache || []);
+        };
+        window.loginAdmin = async function(event) {
+            event.preventDefault();
+            const button = document.getElementById('admin-login-submit');
+            button.disabled = true;
+            document.getElementById('admin-error').textContent = '';
+            try {
+                if (!window.auth) throw new Error('저장 서버 연결 후 다시 시도해주세요.');
+                const credential = await signInWithEmailAndPassword(window.auth,
+                    document.getElementById('admin-email').value.trim(), document.getElementById('admin-password').value);
+                window.currentUser = credential.user;
+                await window.refreshAdmin();
+                window.loadSubmissionsFromFirebase();
+                if (!window.isAdmin) throw new Error('관리자 권한이 없습니다. Firestore의 admins 문서를 확인해주세요.');
+                document.getElementById('admin-dialog').close();
+            } catch (error) {
+                document.getElementById('admin-error').textContent = error.code ? '로그인하지 못했습니다. 계정, 비밀번호 및 이메일/비밀번호 로그인 설정을 확인해주세요.' : error.message;
+            } finally {
+                document.getElementById('admin-password').value = '';
+                button.disabled = false;
+            }
+        };
+        window.toggleAdmin = async function() {
+            if (!window.isAdmin) { document.getElementById('admin-dialog').showModal(); return; }
+            try {
+                await signOut(window.auth);
+                window.isAdmin = false;
+                const credential = await signInAnonymously(window.auth);
+                window.currentUser = credential.user;
+                await window.refreshAdmin();
+                window.loadSubmissionsFromFirebase();
+            } catch (error) { window.firebaseError(error); }
+        };
+        window.deleteSubmission = async function(id, button) {
+            if (!window.isAdmin || !confirm('이 마음 카드를 삭제할까요? 삭제한 내용은 복구할 수 없습니다.')) return;
+            button.disabled = true;
+            try {
+                await deleteDoc(doc(window.db, 'workshops', window.appId, 'submissions', id));
+                window.showToast('게시글을 삭제했습니다.');
+            } catch (error) {
+                window.showToast('삭제하지 못했습니다. 관리자 권한과 보안 규칙을 확인해주세요.', 'warning');
+            } finally { button.disabled = false; }
+        };
         async function initFirebase() {
             if (firebaseConfig.apiKey.startsWith('YOUR_') || firebaseConfig.projectId.startsWith('YOUR_')) {
                 setStatus('Firebase 설정이 필요합니다. 파일의 firebaseConfig를 입력해주세요.');
@@ -437,10 +521,12 @@
                 const app = initializeApp(firebaseConfig);
                 window.db = getFirestore(app);
                 window.auth = getAuth(app);
-                const credential = await signInAnonymously(window.auth);
-                window.currentUser = credential.user;
+                await window.auth.authStateReady();
+                const user = window.auth.currentUser || (await signInAnonymously(window.auth)).user;
+                window.currentUser = user;
                 window.firebaseReady = true;
                 setStatus('저장 서버 연결됨');
+                await window.refreshAdmin();
                 window.loadSubmissionsFromFirebase();
             } catch (error) {
                 window.firebaseReady = false;
@@ -816,9 +902,29 @@
                 currentSelection.card2 = card;
                 renderSlotContent(2, card);
             }
-            showToast(`'${card.name}' 카드가 ${slotNum === 1 ? '오늘 하루' : '연수 참여'} 질문에 설정되었습니다! ✨`);
+            openReasonDialog(slotNum);
         }
 
+        let reasonDialogSlot = null;
+        function openReasonDialog(slotNum) {
+            reasonDialogSlot = slotNum;
+            const card = currentSelection['card' + slotNum];
+            document.getElementById('reason-dialog-question').textContent = `${slotNum === 1 ? '1. 오늘 하루 마음' : '2. 연수 참여 마음'} · ${card.name}`;
+            document.getElementById('reason-dialog-input').value = document.getElementById('reason-' + slotNum).value;
+            document.getElementById('reason-dialog').showModal();
+            document.getElementById('reason-dialog-input').focus();
+        }
+        function syncReasonDraft() {
+            if (reasonDialogSlot) document.getElementById('reason-' + reasonDialogSlot).value = document.getElementById('reason-dialog-input').value;
+        }
+        function closeReasonDialog() { syncReasonDraft(); document.getElementById('reason-dialog').close(); }
+        function saveReasonDialog() {
+            if (!document.getElementById('reason-dialog-input').value.trim()) {
+                showToast('선택한 이유를 작성해주세요.', 'warning');
+                document.getElementById('reason-dialog-input').focus(); return;
+            }
+            closeReasonDialog();
+        }
         /* Render Card inside Drop Slot */
         function renderSlotContent(slotNum, card) {
             const emptyEl = document.getElementById(`slot-${slotNum}-empty`);
@@ -891,6 +997,7 @@
         }
 
         function showCardSelectModal(slotNum) {
+            if (currentSelection['card' + slotNum]) { openReasonDialog(slotNum); return; }
             // If empty slot clicked directly, show toast tip
             if ((slotNum === 1 && !currentSelection.card1) || (slotNum === 2 && !currentSelection.card2)) {
                 showToast("아래 70가지 카드 중 원하는 카드를 클릭하거나 끌어다 놓으세요! 👇");
@@ -1051,9 +1158,8 @@
                                 <span class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${escapeHTML(item.timestamp || '방금 전')}</span>
                             </div>
                         </div>
-                        <span class="text-xs font-bold text-pink-500 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-100">
-                            연수 파트너
-                        </span>
+                        <div class="flex items-center gap-2"><span class="text-xs font-bold text-pink-500 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-100">연수 파트너</span>
+                        ${window.isAdmin ? `<button data-delete-id="${escapeHTML(item.id)}" class="text-xs text-red-600 border border-red-200 rounded-xl px-3 py-1.5">삭제</button>` : ''}</div>
                     </div>
 
                     <!-- Cards Q1 & Q2 Grid -->
@@ -1108,6 +1214,8 @@
                     </div>
                 `;
 
+                const deleteButton = itemEl.querySelector('[data-delete-id]');
+                if (deleteButton) deleteButton.onclick = () => window.deleteSubmission(item.id, deleteButton);
                 feed.appendChild(itemEl);
             });
         };
@@ -1178,6 +1286,13 @@
         }
 
         // Make functions globally reachable
+        window.showToast = showToast;
+        window.openReasonDialog = openReasonDialog;
+        window.closeReasonDialog = closeReasonDialog;
+        window.syncReasonDraft = syncReasonDraft;
+        window.saveReasonDialog = saveReasonDialog;
+        document.getElementById('reason-dialog').addEventListener('cancel', syncReasonDraft);
+        document.getElementById('admin-dialog').addEventListener('close', () => { document.getElementById('admin-password').value = ''; });
         window.switchTab = switchTab;
         window.filterCards = filterCards;
         window.handleDragStart = handleDragStart;
